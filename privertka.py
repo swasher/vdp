@@ -155,18 +155,35 @@ def privertka(csv_file, pile_size, places):
     print('----==============--------------=================-------------')
 
     # Транспонирование. Объеденяем сначала все первые записи (в строку), получаем первый лист, и т.д.
-    for i in range(len(items[0])):
-        z = []
-        for j in range(places):
-            z = z + items[j][i]
-        print(z)
+    # Результат сразу пишем в файл
+    with open("csvoutput.csv", 'w') as f:
+        for i in range(len(items[0])):
+            z = []
+            for j in range(places):
+                z = z + items[j][i]
+            # print(type(z))
+            s = ','.join(z)
+            f.writelines(s+'\n')
+
+
+
+    # возвращаем:
+    #  - тираж,
+    #  - кол-во изделий на листе,
+    #  - полей персонализации на изделии,
+    #  - изделий в привертке
+    #  - Кол-во целых приверток
+    #  - изделий в хвосте
+    #  - листов в хвосте
+    #  - кол-во пустышек
+    return tiraz, places, len(header), pile_size, izdeliy_v_privertke, full_pile_amount, hvost_izdeliy, hvost_listov, dummy
 
 
 def main():
 
     # csv_file = '../data/190326_28349_2019-03_Франч с холдером_15 000.csv'
     # csv_file = '../data/MOCK_DATA.csv'
-    csv_file = '../data/Job_Title.csv'
+    csv_file = 'data/Job_Title.csv'
 
     # листов в привертке
     paper_pile_section = 61
