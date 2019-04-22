@@ -36,6 +36,8 @@ def hello_world():
                     tiraz, places, columns, pile_size, izdeliy_v_privertke, full_pile_amount, hvost_izdeliy, hvost_listov, dummy = privertka(
                         "csvinput.csv", pile, places)
 
+                    tech_text = "fergergerg"
+
             except FileNotFoundError:
                 csv_input_text = 'empty'
 
@@ -46,7 +48,7 @@ def hello_world():
             except FileNotFoundError:
                 csv_ouput_text = 'empty'
 
-            return render_template('index.html', method=method, csv_input_text=csv_input_text, csv_ouput_text=csv_ouput_text)
+            return render_template('index.html', method=method, csv_input_text=csv_input_text, csv_ouput_text=csv_ouput_text, tech_text=tech_text)
 
     else:
         method = {'method': "NOT DEFINE"}
