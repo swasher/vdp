@@ -10,7 +10,8 @@ app.config["DEBUG"] = True
 
 
 @app.route('/', methods=["GET", "POST"])
-def hello_world():
+def main():
+    N = 3000
     if request.method == "POST":
         method = {'method': "POST"}
 
@@ -21,8 +22,13 @@ def hello_world():
             # csv_input_text = f.read().decode("utf-8")
             f.save("csvinput.csv")
 
-            with open("csvinput.csv", 'r') as f:
-                csv_input_text = f.read()
+            # with open("csvinput.csv", 'r') as f:
+            #     csv_input_text = f.readlines(5)
+
+            csv_input_text = ""
+            with open("csvinput.csv") as f:
+                for i in range(N):
+                    csv_input_text += f.readline()
 
             return render_template('index.html', method=method, csv_input_text=csv_input_text)
         elif "pile" in request.form:
@@ -31,12 +37,24 @@ def hello_world():
             pile = int(form['pile'])
             try:
                 with open("csvinput.csv", 'r') as file:
-                    csv_input_text = file.read()
+                    csv_input_text = ""
+                    with open("csvinput.csv") as f:
+                        for i in range(N):
+                            csv_input_text += f.readline()
 
-                    tiraz, places, columns, pile_size, izdeliy_v_privertke, full_pile_amount, hvost_izdeliy, hvost_listov, dummy = privertka(
+                    tiraz, perso_mest, pile_size, izdeliy_v_privertke, full_pile_amount, hvost_izdeliy, hvost_listov, dummy = privertka(
                         "csvinput.csv", pile, places)
 
-                    tech_text = "fergergerg"
+                    tech_text = """
+Тираж: {}
+На листе изделий: {}
+В привертке листов: {}
+Полей персонализации: {}
+Изделий в целой привертке: {}
+Кол-во целых приверток: {}
+Хвост изделий: {}
+Хвост листов: {}
+Пустышек: {}""".format(tiraz, places, pile_size, perso_mest, izdeliy_v_privertke, full_pile_amount, hvost_izdeliy, hvost_listov, dummy)
 
             except FileNotFoundError:
                 csv_input_text = 'empty'
@@ -44,7 +62,10 @@ def hello_world():
 
             try:
                 with open("csvoutput.csv", 'r') as file:
-                    csv_ouput_text = file.read()
+                    csv_ouput_text = ""
+                    with open("csvoutput.csv") as f:
+                        for i in range(N):
+                            csv_ouput_text += f.readline()
             except FileNotFoundError:
                 csv_ouput_text = 'empty'
 

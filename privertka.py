@@ -1,6 +1,7 @@
 import csv
 import itertools
 import pprint
+import math
 
 
 pp = pprint.PrettyPrinter(indent=4)
@@ -124,7 +125,8 @@ def privertka(csv_file, pile_size, places):
     # Если получаются пустые места, они расположены в столбик в хвосте.
     print('------------------------------------- Хвост')
     hvost_izdeliy = len(ostatok)
-    hvost_listov = hvost_izdeliy//places + 1
+    hvost_listov = math.ceil(hvost_izdeliy/places)
+    print('hvost_listov', hvost_listov)
     dummy = places*hvost_listov - hvost_izdeliy
     print('Мест на листе', places, 'Листов в хвостике', hvost_listov)
     print(places, '*', hvost_listov, '=', places*hvost_listov)
@@ -169,14 +171,13 @@ def privertka(csv_file, pile_size, places):
 
     # возвращаем:
     #  - тираж,
-    #  - кол-во изделий на листе,
     #  - полей персонализации на изделии,
     #  - изделий в привертке
     #  - Кол-во целых приверток
     #  - изделий в хвосте
     #  - листов в хвосте
     #  - кол-во пустышек
-    return tiraz, places, len(header), pile_size, izdeliy_v_privertke, full_pile_amount, hvost_izdeliy, hvost_listov, dummy
+    return tiraz, len(header), pile_size, izdeliy_v_privertke, full_pile_amount, hvost_izdeliy, hvost_listov, dummy
 
 
 def main():
@@ -186,10 +187,10 @@ def main():
     csv_file = 'data/Job_Title.csv'
 
     # листов в привертке
-    paper_pile_section = 61
+    paper_pile_section = 2
 
     # изделий на листе
-    places = 7
+    places = 2
 
     privertka(csv_file, paper_pile_section, places)
 
