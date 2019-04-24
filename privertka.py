@@ -165,7 +165,7 @@ def privertka(csv_file, pile_size, places):
                 z = z + items[j][i]
             # print(type(z))
             s = ','.join(z)
-            f.write(s+"|"+'\r\n')
+            f.write(s+'\n')
 
 
 
