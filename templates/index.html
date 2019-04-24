@@ -28,9 +28,9 @@
                     <form action="/" method="POST" enctype="multipart/form-data">
                         <div class="form-group">
         {#              <label for="exampleFormControlFile1">Example file input</label>#}
-                            <input type="file" name="csvinputfile" class="form-control-file" id="exampleFormControlFile1">
+                            <input name="csvinput" type="file" class="form-control-file">
                         </div>
-                        <button type="submit" class="btn btn-primary">Залить</button>
+                        <button name="uploading" type="submit" class="btn btn-primary">Залить</button>
                     </form>
                 </div>
             </div>
@@ -45,15 +45,15 @@
                     <form action="/" method="POST" enctype="multipart/form-data">
                         <div class="form-group form-row">
                             <div class="col">
-                                <input type="text" name='places' class="form-control" placeholder="Изделий на листе">
-                                <small id="emailHelp" class="form-text text-muted">Изделий на листе</small>
+                                <input type="text" name='places' class="form-control" placeholder="Изделий на листе" value="{{ places }}">
+                                <small class="form-text text-muted">Изделий на листе</small>
                             </div>
                             <div class="col">
-                                <input type="text" name='pile' class="form-control" placeholder="Листов в привертке">
-                                <small id="emailHelp" class="form-text text-muted">Листов в привертке</small>
+                                <input type="text" name='pile' class="form-control" placeholder="Листов в привертке" value="{{ pile_size }}">
+                                <small class="form-text text-muted">Листов в привертке</small>
                             </div>
                         </div>
-                        <button type="submit" class="btn btn-primary">Rebuild</button>
+                        <button name="calculation" type="submit" class="btn btn-primary">Rebuild</button>
                     </form>
                 </div>
             </div>

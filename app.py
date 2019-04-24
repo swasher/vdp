@@ -13,10 +13,9 @@ app.config["DEBUG"] = True
 def main():
     N = 3000
     if request.method == "POST":
-        method = {'method': "POST"}
 
-        if "csvinputfile" in request.files:
-            f = request.files['csvinputfile']
+        if "uploading" in request.form:
+            f = request.files['csvinput']
             # file = open("csvinput.csv", "w")
             # file.write(f.content)
             # csv_input_text = f.read().decode("utf-8")
@@ -30,8 +29,8 @@ def main():
                 for i in range(N):
                     csv_input_text += f.readline()
 
-            return render_template('index.html', method=method, csv_input_text=csv_input_text)
-        elif "pile" in request.form:
+            return render_template('index.html', csv_input_text=csv_input_text)
+        elif "calculation" in request.form:
             form = request.form
             places = int(form['places'])
             pile = int(form['pile'])
@@ -69,11 +68,11 @@ def main():
             except FileNotFoundError:
                 csv_ouput_text = 'empty'
 
-            return render_template('index.html', method=method, csv_input_text=csv_input_text, csv_ouput_text=csv_ouput_text, tech_text=tech_text)
+            return render_template('index.html', csv_input_text=csv_input_text, csv_ouput_text=csv_ouput_text,
+                                   tech_text=tech_text, places=places, pile_size=pile_size)
 
     else:
-        method = {'method': "NOT DEFINE"}
-        return render_template('index.html', method=method)
+        return render_template('index.html')
 
 
 @app.route('/download', methods=['GET', 'POST'])
