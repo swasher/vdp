@@ -79,7 +79,7 @@ def main():
 def download():
     # For windows you need to use drive name [ex: F:/Example.pdf]
     path = "csvoutput.csv"
-    return send_file(path, as_attachment=True)
+    return send_file(path)
 
 
 if __name__ == '__main__':
