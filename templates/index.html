@@ -12,88 +12,147 @@
     <title>VPD Scripts</title>
 </head>
 
-<body>
-
-
 <div class="container">
 
-    <h1>MAXPRINT VDP SCRIPT</h1>
-    <div class="row">
-        <div class="col">
-            <div class="card">
-                <div class="card-header">
-                    Upload
-                </div>
-                <div class="card-body">
-                    <form action="/" method="POST" enctype="multipart/form-data">
-                        <div class="form-group">
-        {#              <label for="exampleFormControlFile1">Example file input</label>#}
-                            <input name="csvinput" type="file" class="form-control-file">
-                        </div>
-                        <button name="uploading" type="submit" class="btn btn-primary">Залить</button>
-                    </form>
-                </div>
-            </div>
+    <div class="card">
+        <div class="card-header">
+            Manage database
         </div>
 
-        <div class="col">
-            <div class="card">
-                <div class="card-header">
-                    Convert
-                </div>
-                <div class="card-body">
-                    <form action="/" method="POST" enctype="multipart/form-data">
-                        <div class="form-group form-row">
-                            <div class="col">
-                                <input type="text" name='places' class="form-control" placeholder="Изделий на листе" value="{{ places }}">
-                                <small class="form-text text-muted">Изделий на листе</small>
-                            </div>
-                            <div class="col">
-                                <input type="text" name='pile' class="form-control" placeholder="Листов в привертке" value="{{ pile_size }}">
-                                <small class="form-text text-muted">Листов в привертке</small>
+        <div class="card-body p-1">
+
+                <div class="card-deck  m-0">
+
+                    <div class="card m-1"><p>
+                        <div class="card-body p-2">
+                            <form action="/" method="POST" enctype="multipart/form-data">
+                                <div class="form-group">
+                                  <div class="custom-file">
+                                    <input name="csvinput" type="file" class="custom-file-input" id="input-file"
+                                           required onchange="this.form.submit();">
+                                    <label class="custom-file-label" for="input-file">Исходная база</label>
+                                  </div>
+                                </div>
+        {#                        <button name="uploading" type="submit" class="btn btn-primary">Залить</button>#}
+                            </form>
+                        </div>
+                    </div>
+
+                    <div class="card m-1">
+                        <div class="card-body p-2">
+                            <form action="/" method="POST" enctype="multipart/form-data">
+                                <div class="form-group form-row">
+                                    <div class="col">
+                                        <label for="formPlaces"><small>Изделий на листе</small></label>
+                                        <input class="form-control is-valid" id="formPlaces" type="text" name='places' id="qqq"
+                                               placeholder="0" data-validation="number" value="{{ places }}">
+        {#                                        <div class="valid-feedback" style="color: blue">
+                                            Looks good!
+                                        </div>
+                                        <div class="invalid-feedback" style="color: blue">
+                                          Looks bad!
+                                        </div>#}
+                                    </div>
+                                    <div class="col">
+                                        <label for="formPile"><small>Листов в привертке</small></label>
+                                        <input class="form-control is-valid" id="formPile" type="text" name='pile'
+                                               placeholder="0" data-validation="number" value="{{ pile_size }}">
+                                    </div>
+                                </div>
+                                <button name="calculation" type="submit" class="btn btn-primary">Перестроить</button>
+                                <button  name="download" type="submit" class="btn btn-primary">Скачать</button>
+
+                            </form>
+                        </div>
+                    </div>
+
+                    <div class="card m-1">
+                        <div class="card-body p-2">
+                            <form action="perekladka" method="GET">
+                                <button name="perekladka" type="submit" class="btn btn-primary">Перекладка</button>
+                            </form>
+
+                            <div class="card ">
+                                <div class="card-body">
+                                    <form action="markirovka" method="GET">
+                                        <div class="form-group">
+                                            <input class="form-control" type="text" name='privertka' placeholder="Кол-во изделий в упаковке" data-validation="number" >
+                                            <small class="form-text text-muted">Кол-во изделий в упаковке</small>
+                                        </div>
+                                        <button name="markirovka" type="submit" class="btn btn-primary">Маркировка</button>
+                                    </form>
+                                </div>
                             </div>
                         </div>
-                        <button name="calculation" type="submit" class="btn btn-primary">Rebuild</button>
-                    </form>
+                    </div>
+
                 </div>
-            </div>
+
+
+
         </div>
     </div>
 
-    <div class="row">
-        <div class="col">
-            <label for="exampleFormControlTextarea1">Input data</label>
-            <textarea rows="14" class="form-control" id="exampleFormControlTextarea1">{{ csv_input_text }}</textarea>
-        </div>
-        <div class="col">
-            <label for="exampleFormControlTextarea1">Output data</label>
-            <textarea rows="14" class="form-control" id="exampleFormControlTextarea2">{{ csv_ouput_text }}</textarea>
-        </div>
-    </div>
+
 
     <p>
-    <div class="row">
-        <div class="col">
-            <div class="card">
-                <div class="card-header">
-                    Result
+    <div class="card">
+        <div class="card-header">
+            File is {{ filename }} [input, output, tech]
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-sm-4">
+                    <textarea rows="14" class="form-control">{{ csv_input }}</textarea>
                 </div>
-                <div class="card-body">
-                    <textarea class="form-control" id="exampleFormControlTextarea1" rows="9">{{ tech_text }}</textarea>
-                    <form action="download" method="GET">
-                        <button type="submit" class="btn btn-primary">Download</button>
-                    </form>
+                <div class="col-sm-4">
+                    <textarea rows="14" class="form-control">{{ csv_output }}</textarea>
+                </div>
+                <div class="col-sm-4">
+                    <textarea rows="14" class="form-control">{{ tech }}</textarea>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-
     <!-- Optional JavaScript -->
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery-form-validator/2.3.26/jquery.form-validator.min.js"></script>
+
+    <script>
+        $('#input-file').on('change',function(){
+            //get the file name
+            var fileName = document.getElementById("customFile").files[0].name;
+            //replace the "Choose a file" label
+            $(this).next('.custom-file-label').html(fileName);
+        });
+
+      $.validate({
+        lang: 'en',
+        messages: {
+            qqq: "Please specify your name",
+            email: {
+              required: "We need your email address to contact you",
+              email: "Your email address must be in the format of name@domain.com"
+            }
+          }
+      });
+
+        {#      $.validator.messages.badInt = 'required';
+
+                jQuery.extend(jQuery.validator.messages, {
+                    badInt: 'required'
+                }); #}
+
+    {#$.extend($.validator.messages, { badInt: "Required" });#}
+
+    {#$("input[name='csvinput']").change(function() { this.form.submit(); });#}
+
+    </script>
+
   </body>
 </html>

@@ -1,85 +1,86 @@
+# -*- coding: utf-8 -*-
+
 from flask import Flask
 from flask import send_file
 from flask import request
 from flask import render_template
+from werkzeug.utils import secure_filename
+
 from privertka import privertka
+from markirovka import perekadka
+from util import read_n_lines
+
+import chardet
 
 app = Flask(__name__)
-
 app.config["DEBUG"] = True
 
 
 @app.route('/', methods=["GET", "POST"])
 def main():
-    N = 3000
+    N = 100
+    input_file = "csvinput.csv"
+    converted_file = "csvoutput.csv"
     if request.method == "POST":
-
-        if "uploading" in request.form:
+        # if "files" in request:
+        if len(request.files) > 0:
             f = request.files['csvinput']
-            # file = open("csvinput.csv", "w")
-            # file.write(f.content)
-            # csv_input_text = f.read().decode("utf-8")
-            f.save("csvinput.csv")
+            f.save(input_file)
 
-            # with open("csvinput.csv", 'r') as f:
-            #     csv_input_text = f.readlines(5)
+            ENCODING = chardet.detect(f.getvalue())['encoding']
 
-            csv_input_text = ""
-            with open("csvinput.csv") as f:
-                for i in range(N):
-                    csv_input_text += f.readline()
+            lines = f.getvalue().decode(ENCODING)
+            lines = '\n'.join(lines.split('\n')[:N])
+            filename = secure_filename(f.filename)
+            return render_template('index.html', csv_input=lines, tech=ENCODING, filename=filename)
 
-            return render_template('index.html', csv_input_text=csv_input_text)
         elif "calculation" in request.form:
             form = request.form
             places = int(form['places'])
             pile = int(form['pile'])
-            try:
-                with open("csvinput.csv", 'r') as file:
-                    csv_input_text = ""
-                    with open("csvinput.csv") as f:
-                        for i in range(N):
-                            csv_input_text += f.readline()
+            csv_input = read_n_lines(input_file, N)
 
-                    tiraz, perso_mest, pile_size, izdeliy_v_privertke, full_pile_amount, hvost_izdeliy, hvost_listov, dummy = privertka(
-                        "csvinput.csv", pile, places)
+            tiraz, perso_mest, pile_size, izdeliy_v_privertke, full_pile_amount, hvost_izdeliy, \
+            hvost_listov, dummy = privertka(input_file, pile, places)
 
-                    tech_text = """
-Тираж: {}
-На листе изделий: {}
-В привертке листов: {}
-Полей персонализации: {}
-Изделий в целой привертке: {}
-Кол-во целых приверток: {}
-Хвост изделий: {}
-Хвост листов: {}
-Пустышек: {}""".format(tiraz, places, pile_size, perso_mest, izdeliy_v_privertke, full_pile_amount, hvost_izdeliy, hvost_listov, dummy)
+            tech = render_template('tech_text.html', tiraz=tiraz, places=places, pile_size=pile_size,
+                                   perso_mest=perso_mest, izdeliy_v_privertke=izdeliy_v_privertke,
+                                   full_pile_amount=full_pile_amount, hvost_izdeliy=hvost_izdeliy,
+                                   hvost_listov=hvost_listov, dummy=dummy)
 
-            except FileNotFoundError:
-                csv_input_text = 'empty'
+            csv_output = read_n_lines(converted_file, N)
 
+            return render_template('index.html', csv_input=csv_input, csv_output=csv_output,
+                                   tech=tech, places=places, pile_size=pile_size)
 
-            try:
-                with open("csvoutput.csv", 'r') as file:
-                    csv_ouput_text = ""
-                    with open("csvoutput.csv") as f:
-                        for i in range(N):
-                            csv_ouput_text += f.readline()
-            except FileNotFoundError:
-                csv_ouput_text = 'empty'
+        elif "download" in request.form:
+            download_file = "csvoutput.csv"
+            return send_file(download_file, as_attachment=True)
 
-            return render_template('index.html', csv_input_text=csv_input_text, csv_ouput_text=csv_ouput_text,
-                                   tech_text=tech_text, places=places, pile_size=pile_size)
+        elif "perekladka" in request.form:
+            form = request.form
+            pachka = int(form[''])
+            _ = perekladka(input_file, pachka)
+
+        elif "markirovka" in request.form:
+            form = request.form
+            pachka = int(form[''])
+            _ = perekladka(input_file, pachka)
 
     else:
         return render_template('index.html')
 
 
-@app.route('/download', methods=['GET', 'POST'])
-def download():
-    # For windows you need to use drive name [ex: F:/Example.pdf]
-    path = "csvoutput.csv"
-    return send_file(path)
+# @app.route('/download', methods=['GET', 'POST'])
+# def download():
+#     download_file = "csvoutput.csv"
+#     return send_file(download_file, as_attachment=True)
+
+
+@app.route('/perekladka', methods=['GET', 'POST'])
+def perekladka():
+    download_file = "csvoutput.csv"
+    return send_file(download_file, as_attachment=True)
 
 
 if __name__ == '__main__':

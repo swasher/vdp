@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import csv
 import itertools
 
@@ -10,7 +12,11 @@ def grouper(n, iterable):
         yield chunk
 
 
-def markirovka(csv_file, field, privertka):
+def perekadka(csv_file):
+    pass
+
+
+def markirovka1(csv_file, field, privertka):
 
     with open(csv_file, newline='') as csvfile:
         content = csv.reader(csvfile, delimiter=',')
@@ -47,7 +53,7 @@ def main():
     # листов в привертке
     privertka = 500
 
-    markirovka(csv_file, field, privertka)
+    markirovka1(csv_file, field, privertka)
 
 
 if __name__ == '__main__':

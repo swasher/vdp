@@ -1,8 +1,9 @@
+# -*- coding: utf-8 -*-
+
 import csv
-import itertools
 import pprint
 import math
-
+import chardet
 
 pp = pprint.PrettyPrinter(indent=4)
 
@@ -25,16 +26,12 @@ pp = pprint.PrettyPrinter(indent=4)
 #         yield chunk
 
 
-
-
 def privertka(csv_file, pile_size, places):
     """
-
     :param csv_file: входная база в формате csv, разделитель запятые
     :param pile_size: размер привертки в листах
     :param places: кол-во изделий на листе
     :return:
-
 
     Во второй части марлезонского балета (privertka2) я пытался представить выходную базу
     как двумерный массив, в котором строки - это печатные листы, а столбцы - это места для персухи.
@@ -49,30 +46,27 @@ def privertka(csv_file, pile_size, places):
     [[aa], [bb], [], [], [], []] - столбец персухи 1
     [[cc], [dd], [], [], [], []] - столбец персухи 2
     [[ee], [ff], [], [], [], []] - столбец персухи 3
-      ^
+      ^^
       изделие
+
      ^^^^^^^^^^^
       привертка
 
-
     """
-
-    out_file_name = csv_file + '_PRIV_' + str(pile_size) + '.csv'
-
-
-    with open(csv_file, newline='') as csvfile:
-        content = csv.reader(csvfile, delimiter=',')
-        # skip header line
+    from io import StringIO
+    with open(csv_file, 'rb') as csv_bytes:
+        rawdata = csv_bytes.read()
+        charenc = chardet.detect(rawdata)['encoding']
+        csv_string = StringIO(rawdata.decode(charenc))
+        content = csv.reader(csv_string, delimiter=',')
         header = next(content, None)
         input_base = list(content)
 
     tiraz = len(input_base)
-
     print("Тираж: " + str(tiraz))
     print("На листе изделий: " + str(places))
     print("В привертке листов: " + str(pile_size))
     print("Полей персонализации:", len(header))
-
 
     izdeliy_v_privertke = pile_size * places
     print("В привертке изделий: " + str(izdeliy_v_privertke))
@@ -103,6 +97,7 @@ def privertka(csv_file, pile_size, places):
 
 
     """
+    DEPRECATED
     Этот кусок кода делит "хвост" на половинную привертку, потом еще раз на половинную,
     и так до тех пор, пока остаток не буедт меньше, чем очередная половина.
     Но, как я решил с манагерами, это будет только путать. 
@@ -121,8 +116,8 @@ def privertka(csv_file, pile_size, places):
     """
 
 
-    # Вариант 2 работы с "остатком". Раскладываем на привертку меньшей высоты.
-    # Если получаются пустые места, они расположены в столбик в хвосте.
+    # Раскладываем остаток на привертку меньшей высоты.
+    # Если получаются пустые места, они расположены в один столбик в хвосте.
     print('------------------------------------- Хвост')
     hvost_izdeliy = len(ostatok)
     hvost_listov = math.ceil(hvost_izdeliy/places)
@@ -165,9 +160,7 @@ def privertka(csv_file, pile_size, places):
                 z = z + items[j][i]
             # print(type(z))
             s = ','.join(z)
-            f.write(s+'\r\n')
-
-
+            f.write(s+'\n')
 
     # возвращаем:
     #  - тираж,
