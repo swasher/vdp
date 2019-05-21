@@ -1,6 +1,7 @@
 import os
 
 from flask import Flask
+from flask import session
 from flask import send_file
 from flask import request
 from flask import render_template
@@ -15,6 +16,7 @@ import chardet
 
 app = Flask(__name__)
 N = int(os.getenv("N"))
+app.secret_key = os.getenv("SECRET_KEY")
 
 
 @app.route('/', methods=["GET", "POST"])
@@ -29,9 +31,9 @@ def main():
                 # filename = secure_filename(file.filename)
                 f.save(input_file)
 
-            csv_input, encoding = read_n_lines(input_file, n)
+            csv_input, session['input_encoding'] = read_n_lines(input_file, n)
             filename = secure_filename(f.filename)
-            return render_template('index.html', csv_input=csv_input, tech=encoding, filename=filename)
+            return render_template('index.html', csv_input=csv_input, filename=filename)
 
         elif "calculation" in request.form:
             form = request.form
@@ -42,15 +44,13 @@ def main():
             tiraz, perso_mest, pile_size, izdeliy_v_privertke, full_pile_amount, hvost_izdeliy, \
             hvost_listov, dummy = privertka(input_file, pile, places)
 
-            csv_output, encoding = read_n_lines(converted_file, n)
-
-            tech = render_template('tech_text.html', tiraz=tiraz, places=places, pile_size=pile_size,
-                                   perso_mest=perso_mest, izdeliy_v_privertke=izdeliy_v_privertke,
-                                   full_pile_amount=full_pile_amount, hvost_izdeliy=hvost_izdeliy,
-                                   hvost_listov=hvost_listov, dummy=dummy, enc=encoding)
+            csv_output, session['output_encoding'] = read_n_lines(converted_file, n)
 
             return render_template('index.html', csv_input=csv_input, csv_output=csv_output,
-                                   tech=tech, places=places, pile_size=pile_size)
+                                   places=places, pile_size=pile_size, tiraz=tiraz,
+                                   perso_mest=perso_mest, izdeliy_v_privertke=izdeliy_v_privertke,
+                                   full_pile_amount=full_pile_amount, hvost_izdeliy=hvost_izdeliy,
+                                   hvost_listov=hvost_listov, dummy=dummy)
 
         elif "download" in request.form:
             download_file = "csvoutput.csv"
