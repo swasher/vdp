@@ -1,17 +1,24 @@
 import chardet
-from io import StringIO
 
 
 def read_n_lines(f, n):
-    txt = ""
     try:
         with open(f, 'rb') as csv_bytes:
             rawdata = csv_bytes.read()
-            charenc = chardet.detect(rawdata)['encoding'] # todo VERY HEAVY OPERATION
-            csv_string = StringIO(rawdata.decode(charenc))
-            txt = ''.join([r for r in csv_string][:10])
-            # for i in range(n):
-            #     txt += csv_string.readline()
+            encoding = chardet.detect(rawdata[:n])['encoding']  # todo VERY HEAVY OPERATION
+        with open(f, 'r', encoding=encoding) as csv_string:
+            # csv_string = StringIO(rawdata.decode(encoding))
+            # txt = ''.join([r for r in csv_string][:n])
+
+            # txt = csv_string.readlines(n)(100)
+            txt = [next(csv_string) for x in range(n)]
+            txt = ''.join(txt)
     except FileNotFoundError:
         txt = 'FileNotFoundError'
-    return txt
+        encoding = 'encoding FileNotFoundError'
+    return txt, encoding
+
+
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS

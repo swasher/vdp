@@ -4,6 +4,7 @@ import csv
 import pprint
 import math
 import chardet
+from io import StringIO
 
 pp = pprint.PrettyPrinter(indent=4)
 
@@ -53,7 +54,7 @@ def privertka(csv_file, pile_size, places):
       привертка
 
     """
-    from io import StringIO
+
     with open(csv_file, 'rb') as csv_bytes:
         rawdata = csv_bytes.read()
         charenc = chardet.detect(rawdata)['encoding']
