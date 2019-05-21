@@ -1,3 +1,5 @@
+import os
+
 from flask import Flask
 from flask import send_file
 from flask import request
@@ -12,7 +14,7 @@ from util import allowed_file
 import chardet
 
 app = Flask(__name__)
-app.config["DEBUG"] = True
+N = int(os.getenv("N"))
 
 
 @app.route('/', methods=["GET", "POST"])
@@ -21,8 +23,6 @@ def main():
     input_file = "csvinput.csv"
     converted_file = "csvoutput.csv"
     if request.method == "POST":
-        # if "files" in request:
-        # if len(request.files) > 0:
         if 'csvinput' in request.files:
             f = request.files['csvinput']
             if f and allowed_file(f.filename):

@@ -1,4 +1,7 @@
+import os
 import chardet
+
+ALLOWED_EXTENSIONS = os.getenv("ALLOWED_EXTENSIONS")
 
 
 def read_n_lines(f, n):
