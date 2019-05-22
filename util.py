@@ -25,3 +25,17 @@ def read_n_lines(f, n):
 def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+
+def line_end_convert(file_path):
+    # replacement strings
+    WINDOWS_LINE_ENDING = b'\r\n'
+    UNIX_LINE_ENDING = b'\n'
+
+    with open(file_path, 'rb') as open_file:
+        content = open_file.read()
+
+    content = content.replace(UNIX_LINE_ENDING, WINDOWS_LINE_ENDING)
+
+    with open(file_path, 'wb') as open_file:
+        open_file.write(content)

@@ -1,5 +1,5 @@
 import os
-
+import re
 from flask import Flask
 from flask import session
 from flask import send_file
@@ -11,6 +11,7 @@ from privertka import privertka
 from markirovka import perekadka
 from util import read_n_lines
 from util import allowed_file
+from util import line_end_convert
 
 import chardet
 
@@ -31,9 +32,17 @@ def main():
                 # filename = secure_filename(file.filename)
                 f.save(input_file)
 
-            csv_input, session['input_encoding'] = read_n_lines(input_file, n)
+            csv_input, input_encoding = read_n_lines(input_file, n)
             filename = secure_filename(f.filename)
-            return render_template('index.html', csv_input=csv_input, filename=filename)
+
+            pattern = r'\d\d-\d\d\d\d'
+            result = re.match(pattern, filename)
+            order = result.group(0) if result else None
+
+            session['order'] = order
+            session['filename'] = filename
+            session['input_encoding'] = input_encoding
+            return render_template('index.html', csv_input=csv_input)
 
         elif "calculation" in request.form:
             form = request.form
@@ -78,6 +87,7 @@ def main():
 @app.route('/perekladka', methods=['GET', 'POST'])
 def perekladka():
     download_file = "csvoutput.csv"
+    line_end_convert(download_file)
     return send_file(download_file, as_attachment=True)
 
 

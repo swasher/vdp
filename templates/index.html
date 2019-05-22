@@ -41,27 +41,22 @@
 
             <div class="card m-1">
                <div class="card-body p-2">
-                  <form action="/" method="POST" enctype="multipart/form-data">
+
+                  <form action="/" method="POST" enctype="multipart/form-data" >
                      <div class="form-group form-row">
                         <div class="col">
                            <label for="formPlaces"><small>Изделий на листе</small></label>
-                           <input class="form-control is-valid" id="formPlaces" type="text" name='places' id="qqq"
-                                  placeholder="0" data-validation="number" value="{{ places }}">
-                           {#                                        <div class="valid-feedback" style="color: blue">
-                                        Looks good!
-                                    </div>
-                                    <div class="invalid-feedback" style="color: blue">
-                                      Looks bad!
-                                    </div>#}
+                           <input class="form-control" id="formPlaces" type="text" name='places'
+                                  placeholder="0" value="{{ places }}">
                         </div>
                         <div class="col">
                            <label for="formPile"><small>Листов в привертке</small></label>
-                           <input class="form-control is-valid" id="formPile" type="text" name='pile'
-                                  placeholder="0" data-validation="number" value="{{ pile_size }}">
+                           <input class="form-control" id="formPile" type="text" name='pile'
+                                  placeholder="0" value="{{ pile_size }}">
                         </div>
                      </div>
                      <button name="calculation" type="submit" class="btn btn-primary">Перестроить</button>
-                     <button  name="download" type="submit" class="btn btn-primary">Скачать</button>
+                     <button name="download" type="submit" class="btn btn-primary">Скачать</button>
 
                   </form>
                </div>
@@ -96,7 +91,7 @@
    <p>
    <div class="card">
       <div class="card-header">
-         File is <b>{{ filename }}</b> [input, output, tech]
+         File is <b>{{ session['filename'] }}</b> [input, output, tech]
       </div>
       <div class="card-body">
          <div class="row">
@@ -107,9 +102,9 @@
                <textarea rows="14" class="form-control">{{ csv_output }}</textarea>
             </div>
             <div class="col-sm-4">
-{#               <textarea rows="14" class="form-control">{{ tech }}</textarea>#}
-               <table class="table table-sm table-condensed">
+               <table class="table table-sm table-condensed table-hover">
                  <tbody>
+                   <tr><th scope="row">Заказ</th><td>{{ session['order'] }}</td></tr>
                    <tr><th scope="row">Тираж</th><td>{{ tiraz }}</td></tr>
                    <tr><th scope="row">На листе изделий</th><td>{{ places }}</td></tr>
                    <tr><th scope="row">В привертке листов</th><td>{{ pile_size }}</td></tr>
@@ -134,7 +129,8 @@
 <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
-<script src="//cdnjs.cloudflare.com/ajax/libs/jquery-form-validator/2.3.26/jquery.form-validator.min.js"></script>
+{#<script src="//cdnjs.cloudflare.com/ajax/libs/jquery-form-validator/2.3.26/jquery.form-validator.min.js"></script>#}
+<script src="https://cdn.rawgit.com/PascaleBeier/bootstrap-validate/v2.2.0/dist/bootstrap-validate.js" ></script>
 
 <script>
     $('#input-file').on('change',function(){
@@ -144,16 +140,10 @@
         $(this).next('.custom-file-label').html(fileName);
     });
 
-    $.validate({
-        lang: 'en',
-        messages: {
-            qqq: "Please specify your name",
-            email: {
-                required: "We need your email address to contact you",
-                email: "Your email address must be in the format of name@domain.com"
-            }
-        }
-    });
+   bootstrapValidate(
+      ['#formPlaces', '#formPile'],
+      'integer|required:Введите число!'
+   );
 
 </script>
 
