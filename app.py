@@ -46,8 +46,8 @@ def main():
 
         elif "calculation" in request.form:
             form = request.form
-            places = int(form['places'])
-            pile = int(form['pile'])
+            session['places'] = places = int(form['places'])
+            session['pile'] = pile = int(form['pile'])
             csv_input, _ = read_n_lines(input_file, n)
 
             tiraz, perso_mest, pile_size, izdeliy_v_privertke, full_pile_amount, hvost_izdeliy, \
@@ -87,8 +87,10 @@ def main():
 @app.route('/perekladka', methods=['GET', 'POST'])
 def perekladka():
     download_file = "csvoutput.csv"
-    line_end_convert(download_file)
-    return send_file(download_file)
+    # line_end_convert(download_file)
+    attachment_filename = download_file+"_"+session['places']+"_"+session['pile']
+    attachment_filename = '3333'
+    return send_file(download_file, attachment_filename=attachment_filename, mimetype='text/csv')
 
 
 if __name__ == '__main__':
