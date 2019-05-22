@@ -104,7 +104,7 @@
             <div class="col-sm-4">
                <table class="table table-sm table-condensed table-hover">
                  <tbody>
-                   <tr><th scope="row">Заказ</th><td>{{ session['order'] }}</td></tr>
+                   <tr><th scope="row">Заказ</th><td>{% if session['order'] is not none %}{{ session['order'] }}{% else %}{%endif %}</td></tr>
                    <tr><th scope="row">Тираж</th><td>{{ tiraz }}</td></tr>
                    <tr><th scope="row">На листе изделий</th><td>{{ places }}</td></tr>
                    <tr><th scope="row">В привертке листов</th><td>{{ pile_size }}</td></tr>
@@ -122,7 +122,49 @@
          </div>
       </div>
    </div>
+
+   <p>
+   <div class="card">
+      <div class="card-body">
+         <!-- Button trigger modal -->
+         <div class="d-inline">
+            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal">
+              Help
+            </button>
+         </div>
+         <div class="d-inline float-right">(c) Alexey Dzuba 2019</div>
+
+      </div>
+   </div>
+
 </div>
+
+
+
+<!-- Modal -->
+<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Справка</h5>
+      </div>
+      <div class="modal-body">
+         <ul>
+           <li>Нажми кнопку "Browse", залей исходный файл</li>
+           <li>Введи кол-во изделий на листе и кол-во листов в привертке</li>
+           <li>Нажми кнопку "Перестроить"</li>
+           <li>Проверь, что получилось (база отображается в режиме превью 100 строк)</li>
+           <li>Нажми кнопку "Скачать", чтобы скачать результат</li>
+         </ul>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
 
 <!-- Optional JavaScript -->
 <!-- jQuery first, then Popper.js, then Bootstrap JS -->
