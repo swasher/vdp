@@ -88,7 +88,7 @@ def main():
 def perekladka():
     download_file = "csvoutput.csv"
     line_end_convert(download_file)
-    return send_file(download_file, as_attachment=True)
+    return send_file(download_file)
 
 
 if __name__ == '__main__':
