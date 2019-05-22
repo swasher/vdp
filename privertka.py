@@ -154,14 +154,14 @@ def privertka(csv_file, pile_size, places):
 
     # Транспонирование. Объеденяем сначала все первые записи (в строку), получаем первый лист, и т.д.
     # Результат сразу пишем в файл
-    with open("csvoutput.csv", 'w', newline='\r\n') as f:
+    with open("csvoutput.csv", 'w') as f:
         for i in range(len(items[0])):
             z = []
             for j in range(places):
                 z = z + items[j][i]
             # print(type(z))
             s = ','.join(z)
-            f.write(s)
+            f.write(s+'\r\n')
 
     # возвращаем:
     #  - тираж,
