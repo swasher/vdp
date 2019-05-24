@@ -5,7 +5,9 @@ from flask import session
 from flask import send_file
 from flask import request
 from flask import render_template
+from flask import jsonify
 from werkzeug.utils import secure_filename
+
 
 from privertka import privertka
 from markirovka import perekadka
@@ -42,7 +44,8 @@ def main():
             session['order'] = order
             session['filename'] = filename
             session['input_encoding'] = input_encoding
-            return render_template('index.html', csv_input=csv_input)
+            session['output_encoding'] = ''
+            return render_template('index.html', csv_input=csv_input, status='done')
 
         elif "calculation" in request.form:
             form = request.form
@@ -59,7 +62,7 @@ def main():
                                    places=places, pile_size=pile_size, tiraz=tiraz,
                                    perso_mest=perso_mest, izdeliy_v_privertke=izdeliy_v_privertke,
                                    full_pile_amount=full_pile_amount, hvost_izdeliy=hvost_izdeliy,
-                                   hvost_listov=hvost_listov, dummy=dummy)
+                                   hvost_listov=hvost_listov, dummy=dummy, status='')
 
         elif "download" in request.form:
             download_file = "csvoutput.csv"
@@ -82,6 +85,43 @@ def main():
 # def download():
 #     download_file = "csvoutput.csv"
 #     return send_file(download_file, as_attachment=True)
+
+
+# DEPRECATED
+# ПРИНЯЛ РЕШЕНИЕ НЕ ИСПОЛЬЗОВАТЬ AJAX, ПО КРАЙНЕЙ МЕРЕ ПОКА ЧТО
+# # @cross_origin()
+# @app.route('/upload', methods=['GET', 'POST'])
+# def upload():
+#     n = N
+#     input_file = "csvinput.csv"
+#     converted_file = "csvoutput.csv"
+#     if request.method == "POST":
+#         print(request.files)
+#         try:
+#             f = request.files['csvinput']
+#             if f and allowed_file(f.filename):
+#                 # filename = secure_filename(file.filename)
+#                 f.save(input_file)
+#                 filename = secure_filename(f.filename)
+#         except Exception as e:
+#             print(e)
+#
+#         # f = request.files['csvinput']
+#         # if f and allowed_file(f.filename):
+#         #     # filename = secure_filename(file.filename)
+#         #     f.save(input_file)
+#
+#         csv_input, input_encoding = read_n_lines(input_file, n)
+#
+#         pattern = r'\d\d-\d\d\d\d'
+#         result = re.match(pattern, filename)
+#         order = result.group(0) if result else None
+#
+#         session['order'] = order
+#         session['filename'] = filename
+#         session['input_encoding'] = input_encoding
+#
+#         return jsonify({'input_data': csv_input})
 
 
 @app.route('/perekladka', methods=['GET', 'POST'])

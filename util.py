@@ -24,10 +24,20 @@ def read_n_lines(f, n):
         detector.close()
         encoding = detector.result['encoding']
 
+        """
         with open(f, 'r', encoding=encoding) as csv_string:
             # txt = csv_string.readlines(n)(100)
             strings = [next(csv_string).rstrip() for x in range(n+1)]
             txt = '\n'.join(strings)
+        woring code 
+        """
+
+        txt = ''
+        with open(f, 'r', encoding=encoding) as csv_string:
+            for i in range(20):
+                txt += csv_string.readline()
+
+
     except FileNotFoundError:
         txt = 'FileNotFoundError'
         encoding = 'FileNotFoundError'

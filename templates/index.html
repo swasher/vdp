@@ -26,16 +26,18 @@
 
             <div class="card m-1"><p>
                <div class="card-body p-2">
-                  <form action="/" method="POST" enctype="multipart/form-data">
+                  <form action="/" method="POST" enctype="multipart/form-data" id="upload-form">
                      <div class="form-group">
                         <div class="custom-file">
-                           <input name="csvinput" type="file" class="custom-file-input" id="input-file"
-                                  required onchange="this.form.submit();">
-                           <label class="custom-file-label" for="input-file">Исходная база</label>
+                           <input name="csvinput" type="file" class="custom-file-input" id="input-file" required
+                                  {#onchange="UploadFile();"#}
+                           >
+                           <label class="custom-file-label" for="input-file">{{ session['filename'] }}</label>
                         </div>
                      </div>
                      {#                        <button name="uploading" type="submit" class="btn btn-primary">Залить</button>#}
                   </form>
+                  <div id="status">{{ status }}</div>
                </div>
             </div>
 
@@ -91,15 +93,15 @@
    <p>
    <div class="card">
       <div class="card-header">
-         File is <b>{{ session['filename'] }}</b> [input, output, tech]
+         input -- output -- tech
       </div>
       <div class="card-body">
          <div class="row">
             <div class="col-sm-4">
-               <textarea rows="14" class="form-control">{{ csv_input }}</textarea>
+               <textarea id='input-area' rows="14" class="form-control" readonly>{{ csv_input }}</textarea>
             </div>
             <div class="col-sm-4">
-               <textarea rows="14" class="form-control" wrap="off">{{ csv_output }}</textarea>
+               <textarea rows="14" class="form-control" wrap="off" readonly>{{ csv_output }}</textarea>
             </div>
             <div class="col-sm-4">
                <table class="table table-sm table-condensed table-hover">
@@ -168,24 +170,68 @@
 
 <!-- Optional JavaScript -->
 <!-- jQuery first, then Popper.js, then Bootstrap JS -->
-<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+{#<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>#}
+<script src="https://code.jquery.com/jquery-3.4.1.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
-{#<script src="//cdnjs.cloudflare.com/ajax/libs/jquery-form-validator/2.3.26/jquery.form-validator.min.js"></script>#}
 <script src="https://cdn.rawgit.com/PascaleBeier/bootstrap-validate/v2.2.0/dist/bootstrap-validate.js" ></script>
 
 <script>
-    $('#input-file').on('change',function(){
-        //get the file name
-        var fileName = document.getElementById("customFile").files[0].name;
-        //replace the "Choose a file" label
-        $(this).next('.custom-file-label').html(fileName);
-    });
+//    $( document ).ready(function() {
+        $('#input-file').change (function(){
+            //get the file name
+            //var fileName = document.getElementById('#upload-form').files[0].name;
+            //replace the "Choose a file" label
+            //$(this).next('.custom-file-label').html(fileName);
+            $("#status").text("starting upload...");
+            $('#upload-form').submit();
+        });
+//    });
 
    bootstrapValidate(
       ['#formPlaces', '#formPile'],
       'integer|required:Введите число!'
    );
+
+{# DEPRECATED AJAX UPLOAD FUNCTION
+   function UploadFile()
+   {
+      var formDataRaw = $('#upload-form')[0];
+      var form_data = new FormData(formDataRaw);
+      console.log(form_data);
+      $.ajax({
+          type: 'POST',
+          url: '/upload',
+          data: form_data,
+          contentType: false,
+          cache: false,
+          processData: false,
+          async: false,
+          success: function (data) {
+              console.log('Success!');
+              $("#status").show();
+              $('#input-area').text = data['input_data']
+          },
+      });
+   }#}
+
+
+{#
+   $(function() {
+       var timestamp;
+       $('#upload-file').ajaxForm({
+           beforeSend: function() {
+               timestamp = performance.now();
+               $("#msg").html("starting upload<br>")
+           },
+           complete: function(xhr) {
+               $("#msg").append(xhr.responseText + "<br>")
+               $("#msg").append("time spent on file transmission: " + (performance.now()-timestamp) / 1000 + "s")
+           }
+       });
+   });
+#}
+
 
 </script>
 
