@@ -180,27 +180,27 @@
 
 <script>
 
-{#     $('#input-file').change (function(){
+     $('#input-file').change (function(){
          $("#status").text("starting upload...");
          $('#upload-form').submit();
-     });#}
+     });
 
 
 
-   $(function() {
-       var timestamp;
-       $('#upload-form').ajaxForm({
-           beforeSend: function() {
-               timestamp = performance.now();
-               $("#status").html("starting upload")
-           },
-           complete: function(xhr) {
-               $("#status").append(xhr.responseText + "<br>");
-               $("#status").append("time spent on file transmission: " + (performance.now()-timestamp) / 1000 + "s")
-           }
-       });
-   });
-
+   {#$(function() {#}
+   {#    var timestamp;#}
+   {#    $('#upload-form').ajaxForm({#}
+   {#        beforeSend: function() {#}
+   {#            timestamp = performance.now();#}
+   {#            $("#status").html("starting upload")#}
+   {#        },#}
+   {#        complete: function(xhr) {#}
+   {#            $("#status").append(xhr.responseText + "<br>");#}
+   {#            $("#status").append("time spent on file transmission: " + (performance.now()-timestamp) / 1000 + "s")#}
+   {#        }#}
+   {#    });#}
+   {#});#}
+   {##}
 
 
 
