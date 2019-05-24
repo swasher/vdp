@@ -47,38 +47,16 @@ def main():
             session['output_encoding'] = ''
             return render_template('index.html', csv_input=csv_input, status='done')
 
-            # if request.method == 'POST':
-            #     file = FileTarget(os.path.join(tempfile.gettempdir(), "test"))
-            #
-            #     hdict = {}
-            #     for h in request.headers:
-            #         hdict[h[0]] = h[1]
-            #
-            #     parser = StreamingFormDataParser(headers=hdict)
-            #
-            #     parser.register('file', file)
-            #
-            #     timeA = time.perf_counter()
-            #     while True:
-            #         chunk = request.stream.read(8192)
-            #         if not chunk:
-            #             break
-            #         parser.data_received(chunk)
-            #     timeB = time.perf_counter()
-            #     print("time spent on file reception: %fs" % (timeB - timeA))
-            #     return "upload done"
-            # return page
-
-
-
         elif "calculation" in request.form:
             form = request.form
             session['places'] = places = int(form['places'])
             session['pile'] = pile = int(form['pile'])
             csv_input, _ = read_n_lines(input_file, n)
 
+            input_encoding = session['input_encoding']
+
             tiraz, perso_mest, pile_size, izdeliy_v_privertke, full_pile_amount, hvost_izdeliy, \
-            hvost_listov, dummy = privertka(input_file, pile, places)
+            hvost_listov, dummy = privertka(input_file, pile, places, input_encoding)
 
             csv_output, session['output_encoding'] = read_n_lines(converted_file, n)
 

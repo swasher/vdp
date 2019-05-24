@@ -180,28 +180,10 @@
 
 <script>
 
-     $('#input-file').change (function(){
-         $("#status").text("starting upload...");
-         $('#upload-form').submit();
-     });
-
-
-
-   {#$(function() {#}
-   {#    var timestamp;#}
-   {#    $('#upload-form').ajaxForm({#}
-   {#        beforeSend: function() {#}
-   {#            timestamp = performance.now();#}
-   {#            $("#status").html("starting upload")#}
-   {#        },#}
-   {#        complete: function(xhr) {#}
-   {#            $("#status").append(xhr.responseText + "<br>");#}
-   {#            $("#status").append("time spent on file transmission: " + (performance.now()-timestamp) / 1000 + "s")#}
-   {#        }#}
-   {#    });#}
-   {#});#}
-   {##}
-
+  $('#input-file').change (function(){
+      $("#status").text("starting upload...");
+      $('#upload-form').submit();
+  });
 
 
    bootstrapValidate(
@@ -230,23 +212,6 @@
           },
       });
    }#}
-
-
-{#
-   $(function() {
-       var timestamp;
-       $('#upload-file').ajaxForm({
-           beforeSend: function() {
-               timestamp = performance.now();
-               $("#msg").html("starting upload<br>")
-           },
-           complete: function(xhr) {
-               $("#msg").append(xhr.responseText + "<br>")
-               $("#msg").append("time spent on file transmission: " + (performance.now()-timestamp) / 1000 + "s")
-           }
-       });
-   });
-#}
 
 
 </script>

@@ -27,11 +27,12 @@ pp = pprint.PrettyPrinter(indent=4)
 #         yield chunk
 
 
-def privertka(csv_file, pile_size, places):
+def privertka(csv_file, pile_size, places, input_encoding):
     """
     :param csv_file: входная база в формате csv, разделитель запятые
     :param pile_size: размер привертки в листах
     :param places: кол-во изделий на листе
+    :param input_encoding: string, кодировка входящего файла
     :return:
 
     Во второй части марлезонского балета (privertka2) я пытался представить выходную базу
@@ -55,13 +56,20 @@ def privertka(csv_file, pile_size, places):
 
     """
 
-    with open(csv_file, 'rb') as csv_bytes:
-        rawdata = csv_bytes.read()
-        charenc = chardet.detect(rawdata)['encoding']
-        csv_string = StringIO(rawdata.decode(charenc))
+    # with open(csv_file, 'rb') as csv_bytes:
+    #     rawdata = csv_bytes.read()
+    #     charenc = chardet.detect(rawdata)['encoding']
+    #     csv_string = StringIO(rawdata.decode(charenc))
+    #     content = csv.reader(csv_string, delimiter=',')
+    #     header = next(content, None)
+    #     input_base = list(content)
+
+    with open(csv_file, 'r', encoding=input_encoding) as csv_string:
         content = csv.reader(csv_string, delimiter=',')
         header = next(content, None)
         input_base = list(content)
+
+
 
     tiraz = len(input_base)
     print("Тираж: " + str(tiraz))
