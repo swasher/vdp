@@ -29,23 +29,47 @@ def main():
     converted_file = "csvoutput.csv"
     if request.method == "POST":
         if 'csvinput' in request.files:
-            f = request.files['csvinput']
-            if f and allowed_file(f.filename):
-                # filename = secure_filename(file.filename)
-                f.save(input_file)
+            # f = request.files['csvinput']
+            # if f and allowed_file(f.filename):
+            #     # filename = secure_filename(file.filename)
+            #     f.save(input_file)
+            #
+            # csv_input, input_encoding = read_n_lines(input_file, n)
+            # filename = secure_filename(f.filename)
+            #
+            # pattern = r'\d\d-\d\d\d\d'
+            # result = re.match(pattern, filename)
+            # order = result.group(0) if result else None
+            #
+            # session['order'] = order
+            # session['filename'] = filename
+            # session['input_encoding'] = input_encoding
+            # session['output_encoding'] = ''
+            # return render_template('index.html', csv_input=csv_input, status='done')
 
-            csv_input, input_encoding = read_n_lines(input_file, n)
-            filename = secure_filename(f.filename)
+            if request.method == 'POST':
+                file = FileTarget(os.path.join(tempfile.gettempdir(), "test"))
 
-            pattern = r'\d\d-\d\d\d\d'
-            result = re.match(pattern, filename)
-            order = result.group(0) if result else None
+                hdict = {}
+                for h in request.headers:
+                    hdict[h[0]] = h[1]
 
-            session['order'] = order
-            session['filename'] = filename
-            session['input_encoding'] = input_encoding
-            session['output_encoding'] = ''
-            return render_template('index.html', csv_input=csv_input, status='done')
+                parser = StreamingFormDataParser(headers=hdict)
+
+                parser.register('file', file)
+
+                timeA = time.perf_counter()
+                while True:
+                    chunk = request.stream.read(8192)
+                    if not chunk:
+                        break
+                    parser.data_received(chunk)
+                timeB = time.perf_counter()
+                print("time spent on file reception: %fs" % (timeB - timeA))
+                return "upload done"
+            return page
+
+
 
         elif "calculation" in request.form:
             form = request.form

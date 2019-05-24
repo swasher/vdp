@@ -175,18 +175,34 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
 <script src="https://cdn.rawgit.com/PascaleBeier/bootstrap-validate/v2.2.0/dist/bootstrap-validate.js" ></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.form/4.2.2/jquery.form.min.js" integrity="sha384-FzT3vTVGXqf7wRfy8k4BiyzvbNfeYjK+frTVqZeNDFl8woCbF0CYG6g2fMEFFo/i" crossorigin="anonymous"></script>
+
 
 <script>
-//    $( document ).ready(function() {
-        $('#input-file').change (function(){
-            //get the file name
-            //var fileName = document.getElementById('#upload-form').files[0].name;
-            //replace the "Choose a file" label
-            //$(this).next('.custom-file-label').html(fileName);
-            $("#status").text("starting upload...");
-            $('#upload-form').submit();
-        });
-//    });
+
+{#     $('#input-file').change (function(){
+         $("#status").text("starting upload...");
+         $('#upload-form').submit();
+     });#}
+
+
+
+   $(function() {
+       var timestamp;
+       $('#upload-form').ajaxForm({
+           beforeSend: function() {
+               timestamp = performance.now();
+               $("#status").html("starting upload")
+           },
+           complete: function(xhr) {
+               $("#status").append(xhr.responseText + "<br>");
+               $("#status").append("time spent on file transmission: " + (performance.now()-timestamp) / 1000 + "s")
+           }
+       });
+   });
+
+
+
 
    bootstrapValidate(
       ['#formPlaces', '#formPile'],
