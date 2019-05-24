@@ -1,1 +1,1 @@
-web: waitress-serve —port=80 nuncio:app
+web: waitress-serve --port=80 nuncio:app
