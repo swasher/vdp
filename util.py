@@ -12,29 +12,37 @@ def read_n_lines(f, n):
     :param n: кол-во строк
     :return: string, первые n строк из файла f
     """
+    from datetime import datetime
     try:
 
-        detector = UniversalDetector()
+        # DEPRECATED DUE LONG OPERATION (ABOUT 9-13 SEC ON HEAVY FILE)
+        # detector = UniversalDetector()
+        # with open(f, 'rb') as csv_bytes:
+        #     k = datetime.now()
+        #     for row in csv_bytes:
+        #         detector.feed(row)
+        #         if detector.done: break
+        #
+        # print(datetime.now() - k)
+        # detector.close()
+        # encoding = detector.result['encoding']
 
+        k = datetime.now()
         with open(f, 'rb') as csv_bytes:
-            for row in csv_bytes:
-                detector.feed(row)
-                if detector.done: break
+            rawdata = csv_bytes.read()
+            encoding = chardet.detect(rawdata[:n])['encoding']  # heavy operation if dont provide :n
+        print(datetime.now() - k)
 
-        detector.close()
-        encoding = detector.result['encoding']
+        # working code
+        # with open(f, 'r', encoding=encoding) as csv_string:
+        #     # txt = csv_string.readlines(n)(100)
+        #     strings = [next(csv_string).rstrip() for x in range(n+1)]
+        #     txt = '\n'.join(strings)
 
-        """
-        with open(f, 'r', encoding=encoding) as csv_string:
-            # txt = csv_string.readlines(n)(100)
-            strings = [next(csv_string).rstrip() for x in range(n+1)]
-            txt = '\n'.join(strings)
-        woring code 
-        """
 
         txt = ''
         with open(f, 'r', encoding=encoding) as csv_string:
-            for i in range(20):
+            for i in range(n):
                 txt += csv_string.readline()
 
 
