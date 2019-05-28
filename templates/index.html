@@ -152,6 +152,7 @@
       </div>
       <div class="modal-body">
          <ul>
+           <li>Название файла должно начинаться с номера заказа (19-1234_pers.csv)</li>
            <li>Нажми кнопку "Browse", залей исходный файл</li>
            <li>Введи кол-во изделий на листе и кол-во листов в привертке</li>
            <li>Нажми кнопку "Перестроить"</li>
@@ -190,29 +191,6 @@
       ['#formPlaces', '#formPile'],
       'integer|required:Введите число!'
    );
-
-{# DEPRECATED AJAX UPLOAD FUNCTION
-   function UploadFile()
-   {
-      var formDataRaw = $('#upload-form')[0];
-      var form_data = new FormData(formDataRaw);
-      console.log(form_data);
-      $.ajax({
-          type: 'POST',
-          url: '/upload',
-          data: form_data,
-          contentType: false,
-          cache: false,
-          processData: false,
-          async: false,
-          success: function (data) {
-              console.log('Success!');
-              $("#status").show();
-              $('#input-area').text = data['input_data']
-          },
-      });
-   }#}
-
 
 </script>
 

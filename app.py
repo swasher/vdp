@@ -1,11 +1,11 @@
 import os
 import re
+import csv
 from flask import Flask
 from flask import session
 from flask import send_file
 from flask import request
 from flask import render_template
-from flask import jsonify
 from werkzeug.utils import secure_filename
 
 
@@ -13,9 +13,6 @@ from privertka import privertka
 from markirovka import perekadka
 from util import read_n_lines
 from util import allowed_file
-from util import line_end_convert
-
-import chardet
 
 app = Flask(__name__)
 N = int(os.getenv("N"))
@@ -41,11 +38,16 @@ def main():
             result = re.match(pattern, filename)
             order = result.group(0) if result else None
 
+            tiraz, perso_mest, bad_data, trouble = consistency(input_file, input_encoding)
+            if bad_data:
+                csv_input = trouble
+
             session['order'] = order
             session['filename'] = filename
             session['input_encoding'] = input_encoding
             session['output_encoding'] = ''
-            return render_template('index.html', csv_input=csv_input, status='done')
+            return render_template('index.html', csv_input=csv_input, perso_mest=perso_mest,
+                                   status='done', tiraz=tiraz)
 
         elif "calculation" in request.form:
             form = request.form
@@ -83,55 +85,39 @@ def main():
         return render_template('index.html')
 
 
-# @app.route('/download', methods=['GET', 'POST'])
-# def download():
-#     download_file = "csvoutput.csv"
-#     return send_file(download_file, as_attachment=True)
-
-
-# DEPRECATED
-# ПРИНЯЛ РЕШЕНИЕ НЕ ИСПОЛЬЗОВАТЬ AJAX, ПО КРАЙНЕЙ МЕРЕ ПОКА ЧТО
-# # @cross_origin()
-# @app.route('/upload', methods=['GET', 'POST'])
-# def upload():
-#     n = N
-#     input_file = "csvinput.csv"
-#     converted_file = "csvoutput.csv"
-#     if request.method == "POST":
-#         print(request.files)
-#         try:
-#             f = request.files['csvinput']
-#             if f and allowed_file(f.filename):
-#                 # filename = secure_filename(file.filename)
-#                 f.save(input_file)
-#                 filename = secure_filename(f.filename)
-#         except Exception as e:
-#             print(e)
-#
-#         # f = request.files['csvinput']
-#         # if f and allowed_file(f.filename):
-#         #     # filename = secure_filename(file.filename)
-#         #     f.save(input_file)
-#
-#         csv_input, input_encoding = read_n_lines(input_file, n)
-#
-#         pattern = r'\d\d-\d\d\d\d'
-#         result = re.match(pattern, filename)
-#         order = result.group(0) if result else None
-#
-#         session['order'] = order
-#         session['filename'] = filename
-#         session['input_encoding'] = input_encoding
-#
-#         return jsonify({'input_data': csv_input})
+def consistency(f, encoding):
+    """
+    Проверяем консистентность данных. Анализируем заголовок, понимаем сколько полей.
+    Потом анализируем все строки на такое же кол-во данных.
+    Заодно передаем дальше число строк (тираж)
+    :param f (string) имя файла с данными (csv, который загружен пользователем)
+    :param encoding (string) кодировка файла
+    :return: tiraz (int) сколько строк в файле (без заголовка)
+    :return: bad_data (bool) если найдено несоответствие, то True
+    :return: text (string) текст о неконсистентности данных
+    """
+    with open(f, 'r', encoding=encoding) as csv_string:
+        content = csv.reader(csv_string, delimiter=',')
+        header = next(content, None)
+        columns = len(header)
+        print('Кол-во полей в заголовке:', len(header))
+        bad_data = False
+        text = ''
+        for i, row in enumerate(content):
+            tiraz = i
+            row_len = len(row)
+            if row_len != columns:
+                print(f'ERROR: line {i+1}, contain {row_len} item!')
+                text += f'ERROR: line {i+1}, contain {row_len} item!\n'
+                bad_data = True
+        tiraz += 1
+        return tiraz, columns, bad_data, text
 
 
 @app.route('/perekladka', methods=['GET', 'POST'])
 def perekladka():
     download_file = "csvoutput.csv"
-    # line_end_convert(download_file)
     attachment_filename = download_file+"_"+session['places']+"_"+session['pile']
-    attachment_filename = '3333'
     return send_file(download_file, attachment_filename=attachment_filename, mimetype='text/csv')
 
 
