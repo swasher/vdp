@@ -1,7 +1,8 @@
-# -*- coding: utf-8 -*-
-
 import csv
 import itertools
+import math
+from flask import session
+
 
 def grouper(n, iterable):
     it = iter(iterable)
@@ -10,10 +11,6 @@ def grouper(n, iterable):
         if not chunk:
             return
         yield chunk
-
-
-def perekadka(csv_file):
-    pass
 
 
 def markirovka1(csv_file, field, privertka):
@@ -41,6 +38,113 @@ def markirovka1(csv_file, field, privertka):
                 #print(s, end="\r") #печать в консоль в одну строку, типа прогресс
 
 # todo маркировка столбцов
+
+def perekladka(csv_file):
+    """
+    Перекладку формируем исходя из размера привертки (pile_size)
+    За основу берем код privertka.py и модифицируем
+
+    Нам нужны такие столбцы
+      - номер заказа
+      - номер привертки
+      - номер пачки и кол-во пачек (5 из 50)
+      - кол-во изделий в пачке
+      - DEPRECATED номера изделий (напр., всего 10 000 изделий, на пачке может быть написано 5501-6000)
+      - персонализация с - по (т.е. переменное на первом изделии в пачке - тире - последнее в пачке)
+
+    :param csv_file:
+    :param pile_size:
+    :param places:
+    :param input_encoding:
+    :return:
+    """
+
+    # номер колонки для печати на перекладке (первая - ноль)
+    colon = 0
+
+    order = session['order']
+    places = session['places']
+    pile_size = session['pile']
+    input_encoding = session['input_encoding']
+    izdeliy_v_privertke = pile_size * places
+
+    fieldnames = ['order', 'privertka', 'pachka', 'amount', 'pers']
+
+
+
+
+
+    pachka = 0
+    privertka = 0
+
+    with open(csv_file, 'r', encoding=input_encoding) as csv_string:
+        content = csv.reader(csv_string, delimiter=',')
+        header = next(content, None)
+        input_base = list(content)
+
+    tiraz = len(input_base)
+    full_pile_amount = tiraz // (pile_size * places)
+    kolich_pachkek_bez_hvosta = full_pile_amount * places
+    # количество пачек в хвосте всегода равно places
+    total_pachki = kolich_pachkek_bez_hvosta + places
+
+
+    with open('perekladka.csv', 'w', newline='\r\n') as csvfile:
+        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+        writer.writeheader()
+
+        # Делаем сначала целые привертки (izdeliy_v_privertke)
+        ostatok = input_base
+        while len(ostatok) >= izdeliy_v_privertke:
+            privertka += 1
+            for i in range(places):
+                chunk = ostatok[:pile_size]
+                pers = ' - '.join([chunk[0][colon], chunk[-1][colon]])
+                amount = len(chunk)
+                ostatok = ostatok[pile_size:]
+                pachka += 1
+
+                # writer.writerow({'order': order, 'privertka': privertka, 'pachka': pachka, 'amount': amount, 'pers': pers})
+                writer.writerow({'order': f'№ Заказа: {order}',
+                                 'privertka': f'Привертка № {privertka}',
+                                 'pachka': f'Пачка №{pachka} (из {total_pachki})',
+                                 'amount': f'Кол-во в пачке: {amount}',
+                                 'pers': f'Номера с/по: {pers}'})
+
+                # str = f'Заказ: {order}\nПривертка {privertka}\nПачка: {pachka}\nВ пачке: {amount}\nНомера {pers}'
+                # csvfile.write(str)
+
+        # а теперь хвост (хвост, это когда изделий уже не хватает на целую привертку)
+        hvost_izdeliy = len(ostatok)
+        hvost_listov = math.ceil(hvost_izdeliy / places)
+        dummy = places * hvost_listov - hvost_izdeliy
+
+        # добавляем к остатку
+        empty = ['-' for i in range(len(header))]
+        for i in range(dummy):
+            ostatok.append(empty)
+
+        privertka += 1
+        for i in range(places):
+            chunk = ostatok[:hvost_listov]
+
+            pachka += 1
+            pers = ' - '.join([chunk[0][colon], chunk[-1][colon]])
+            ostatok = ostatok[hvost_listov:]
+            amount = len(chunk)
+
+            # отнимаем из количества изделий в последней пачке кол-во пустышек
+            if i == places-1:
+                amount -= dummy
+
+            writer.writerow({'order': f'№ Заказа: {order}',
+                             'privertka': f'Привертка № {privertka}',
+                             'pachka': f'Пачка №{pachka} (из {total_pachki})',
+                             'amount': f'Кол-во в пачке: {amount}',
+                             'pers': f'Номера с/по: {pers}'})
+            # str = f'Заказ: {order}\nПривертка {privertka}\nПачка: {pachka}\nВ пачке: {amount}\nНомера {pers}'
+            # csvfile.write(str)
+
 
 def main():
 

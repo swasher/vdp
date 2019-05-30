@@ -56,20 +56,10 @@ def privertka(csv_file, pile_size, places, input_encoding):
 
     """
 
-    # with open(csv_file, 'rb') as csv_bytes:
-    #     rawdata = csv_bytes.read()
-    #     charenc = chardet.detect(rawdata)['encoding']
-    #     csv_string = StringIO(rawdata.decode(charenc))
-    #     content = csv.reader(csv_string, delimiter=',')
-    #     header = next(content, None)
-    #     input_base = list(content)
-
     with open(csv_file, 'r', encoding=input_encoding) as csv_string:
         content = csv.reader(csv_string, delimiter=',')
         header = next(content, None)
         input_base = list(content)
-
-
 
     tiraz = len(input_base)
     print("Тираж: " + str(tiraz))
@@ -93,7 +83,7 @@ def privertka(csv_file, pile_size, places, input_encoding):
     # [['6', 'fffff', 'xx'], ['7', 'ggggg', 'xx'], ['8', 'iiiii', 'xx'], ['9', 'kkkkk', 'xx'], ['10', 'lllll', 'xx'], ['16', 'ergf', 'xx'], ['17', 'kiwu', 'xx'], ['18', 'erjg', 'xx'], ['19', 'hytj', 'xx'], ['20', 'utkj', 'xx'], ['26', 'egeg', 'xx'], ['27', 'ejer', 'xx'], ['28', 'gtrh', 'xx'], ['29', 'thrh', 'xx'], ['30', 'rhtr', 'xx']]
     items = []
     for i in range(places):
-        h = [k+str(i+1) for k in header] # нумеруем заголовки (у нас же теперь несколько столбцов) - id1, id2....
+        h = [k+str(i+1) for k in header] # нумеруем заголовки (у нас же теперь несколько столбцов) - id1, name1, id2, name2, etc
         items.append([h])
 
     # Делаем сначала целые привертки (izdeliy_v_privertke)
@@ -137,7 +127,7 @@ def privertka(csv_file, pile_size, places, input_encoding):
     print('Пустых изделий добавить', dummy)
 
     # добавляем к остатку
-    empty = ['' for i in range(len(header))]
+    empty = ['-' for i in range(len(header))]
     for i in range(dummy):
         ostatok.append(empty)
 

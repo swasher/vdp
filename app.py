@@ -10,7 +10,7 @@ from werkzeug.utils import secure_filename
 
 
 from privertka import privertka
-from markirovka import perekadka
+from markirovka import perekladka
 from util import read_n_lines
 from util import allowed_file
 
@@ -73,9 +73,11 @@ def main():
             return send_file(download_file, as_attachment=True)
 
         elif "perekladka" in request.form:
-            form = request.form
-            pachka = int(form[''])
-            _ = perekladka(input_file, pachka)
+            download_file = "perekladka.csv"
+            attachment_filename = download_file + "_" + str(session['places']) + "_" + str(session['pile'])+'.csv'
+            input_file = "csvinput.csv"
+            perekladka(input_file)
+            return send_file(download_file, as_attachment=True, attachment_filename=attachment_filename, mimetype='text/csv')
 
         elif "markirovka" in request.form:
             form = request.form
@@ -112,13 +114,6 @@ def consistency(f, encoding):
                 bad_data = True
         tiraz += 1
         return tiraz, columns, bad_data, text
-
-
-@app.route('/perekladka', methods=['GET', 'POST'])
-def perekladka():
-    download_file = "csvoutput.csv"
-    attachment_filename = download_file+"_"+session['places']+"_"+session['pile']
-    return send_file(download_file, attachment_filename=attachment_filename, mimetype='text/csv')
 
 
 if __name__ == '__main__':
