@@ -70,10 +70,6 @@ def perekladka(csv_file):
 
     fieldnames = ['order', 'privertka', 'pachka', 'amount', 'pers']
 
-
-
-
-
     pachka = 0
     privertka = 0
 
@@ -85,7 +81,7 @@ def perekladka(csv_file):
     tiraz = len(input_base)
     full_pile_amount = tiraz // (pile_size * places)
     kolich_pachkek_bez_hvosta = full_pile_amount * places
-    # количество пачек в хвосте всегода равно places
+    # количество пачек в хвосте всегда равно places
     total_pachki = kolich_pachkek_bez_hvosta + places
 
 
