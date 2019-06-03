@@ -142,6 +142,8 @@ def perekladka(csv_file):
             # csvfile.write(str)
 
 
+
+
 def main():
 
     # csv_file = '../data/190326_28349_2019-03_Франч с холдером_15 000.csv'

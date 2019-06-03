@@ -7,7 +7,7 @@ from flask import send_file
 from flask import request
 from flask import render_template
 from werkzeug.utils import secure_filename
-
+from fpdf import FPDF
 
 from privertka import privertka
 from markirovka import perekladka
@@ -79,12 +79,47 @@ def main():
             perekladka(input_file)
             return send_file(download_file, as_attachment=True, attachment_filename=attachment_filename, mimetype='text/csv')
 
-        elif "markirovka" in request.form:
-            form = request.form
-            pachka = int(form[''])
-            _ = perekladka(input_file, pachka)
+        # elif "markirovka" in request.form:
+        #     form = request.form
+        #     pachka = int(form[''])
+        #     _ = perekladka(input_file, pachka)
+
+        elif "test_fpdf" in request.form:
+            return ('Hello!!!')
     else:
         return render_template('index.html')
+
+
+@app.route('/markirovka', methods=["GET", "POST"])
+def markirovka():
+    pdf_name = 'mark.pdf'
+    # if pdf_name.ex
+    # os.remove(pdf_name)
+
+    pdf = FPDF('P', 'mm', [100, 60])
+    pdf.add_font('DejaVuSans', '', 'C:\Windows\Fonts\DejaVuSans.ttf', uni=True)
+    pdf.set_font('DejaVuSans', '', 12)
+    pdf.set_auto_page_break(False, 0)
+
+
+    with open('perekladka.csv', 'r', encoding='windows-1251') as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            pdf.add_page()
+
+            txt = '\n'.join([row['order'], row['privertka'], row['pachka'], row['amount'], row['pers']])
+
+            # pdf.cell(0, 0, row['order'], ln=2)
+            # pdf.cell(0, 0, row['privertka'], ln=2)
+            # pdf.cell(0, 0, row['pachka'], ln=2)
+            # pdf.cell(0, 0, row['amount'], ln=2)
+            # pdf.cell(0, 0, row['pers'], ln=2)
+
+            pdf.multi_cell(0, 5, txt, 0, 'L')
+
+    pdf.output(pdf_name, 'F')
+
+    return send_file(pdf_name, as_attachment=True, mimetype='application/pdf')
 
 
 def consistency(f, encoding):

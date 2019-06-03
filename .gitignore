@@ -6,3 +6,5 @@ csvinput.csv
 csvoutput.csv
 __pycache__/
 .env
+/perekladka.csv
+/mark.pdf

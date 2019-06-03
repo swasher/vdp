@@ -12,6 +12,7 @@ python-form = "*"
 python-dotenv = "*"
 chardet = "*"
 waitress = "*"
+fpdf = "*"
 
 [requires]
 python_version = "3.7"
