@@ -100,7 +100,7 @@ def markirovka():
     try:
         pdf.add_font('DejaVuSans', '', 'C:\Windows\Fonts\DejaVuSans.ttf', uni=True)
     except RuntimeError:
-        pdf.add_font('DejaVuSans', '', 'static\DejaVuSans.ttf', uni=True)
+        pdf.add_font('DejaVuSans', '', '/app/static/DejaVuSans.ttf', uni=True)
     pdf.set_font('DejaVuSans', '', 12)
     pdf.set_auto_page_break(False, 0)
 
