@@ -97,15 +97,16 @@ def markirovka():
     # os.remove(pdf_name)
 
     pdf = FPDF('P', 'mm', [100, 60])
-    try:
-        pdf.add_font('DejaVuSans', '', 'C:\Windows\Fonts\DejaVuSans.ttf', uni=True)
-    except RuntimeError:
+    if os.getenv("FLASK_ENV") == 'production':
         pdf.add_font('DejaVuSans', '', '/app/static/DejaVuSans.ttf', uni=True)
+        encoding = 'utf-8'
+    else:
+        pdf.add_font('DejaVuSans', '', 'C:\\Windows\\Fonts\\DejaVuSans.ttf', uni=True)
+        encoding = 'windows-1251'
     pdf.set_font('DejaVuSans', '', 12)
     pdf.set_auto_page_break(False, 0)
 
-
-    with open('perekladka.csv', 'r', encoding='windows-1251') as f:
+    with open('perekladka.csv', 'r', encoding=encoding) as f:
         reader = csv.DictReader(f)
         for row in reader:
             pdf.add_page()
