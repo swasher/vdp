@@ -8,7 +8,7 @@ ALLOWED_EXTENSIONS = os.getenv("ALLOWED_EXTENSIONS")
 
 def read_n_lines(f, n):
     """
-    :param f: имя файла 
+    :param f: имя файла
     :param n: кол-во строк
     :return: string, первые n строк из файла f
     """
@@ -39,12 +39,10 @@ def read_n_lines(f, n):
         #     strings = [next(csv_string).rstrip() for x in range(n+1)]
         #     txt = '\n'.join(strings)
 
-
         txt = ''
         with open(f, 'r', encoding=encoding) as csv_string:
             for i in range(n):
                 txt += csv_string.readline()
-
 
     except FileNotFoundError:
         txt = 'FileNotFoundError'

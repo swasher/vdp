@@ -8,3 +8,4 @@ __pycache__/
 .env
 /perekladka.csv
 /mark.pdf
+*.csv

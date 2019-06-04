@@ -13,6 +13,7 @@ def grouper(n, iterable):
         yield chunk
 
 
+# DEPRECATED
 def markirovka1(csv_file, field, privertka):
 
     with open(csv_file, newline='') as csvfile:
@@ -39,7 +40,7 @@ def markirovka1(csv_file, field, privertka):
 
 # todo маркировка столбцов
 
-def perekladka(csv_file):
+def do_perekladka(csv_file, out_file):
     """
     Перекладку формируем исходя из размера привертки (pile_size)
     За основу берем код privertka.py и модифицируем
@@ -84,8 +85,7 @@ def perekladka(csv_file):
     # количество пачек в хвосте всегда равно places
     total_pachki = kolich_pachkek_bez_hvosta + places
 
-
-    with open('perekladka.csv', 'w', newline='\r\n') as csvfile:
+    with open(out_file, 'w', newline='\r\n') as csvfile:
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
         writer.writeheader()
 
@@ -140,8 +140,6 @@ def perekladka(csv_file):
                              'pers': f'Номера с/по: {pers}'})
             # str = f'Заказ: {order}\nПривертка {privertka}\nПачка: {pachka}\nВ пачке: {amount}\nНомера {pers}'
             # csvfile.write(str)
-
-
 
 
 def main():

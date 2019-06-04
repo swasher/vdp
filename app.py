@@ -10,84 +10,94 @@ from werkzeug.utils import secure_filename
 from fpdf import FPDF
 
 from privertka import privertka
-from markirovka import perekladka
+from markirovka import do_perekladka
 from util import read_n_lines
 from util import allowed_file
 
 app = Flask(__name__)
-N = int(os.getenv("N"))
+app.config['N'] = int(os.getenv("N"))
 app.secret_key = os.getenv("SECRET_KEY")
 
 
 @app.route('/', methods=["GET", "POST"])
 def main():
-    n = N
-    input_file = "csvinput.csv"
-    converted_file = "csvoutput.csv"
+    n = app.config['N']
+    # input_file = "csvinput.csv"
+    # converted_file = "csvoutput.csv"
     if request.method == "POST":
         if 'csvinput' in request.files:
             f = request.files['csvinput']
             if f and allowed_file(f.filename):
-                # filename = secure_filename(file.filename)
+                input_file = secure_filename(f.filename)
                 f.save(input_file)
+            else:
+                raise Exception('Not valid filename!')
 
-            csv_input, input_encoding = read_n_lines(input_file, n)
-            filename = secure_filename(f.filename)
+            preview_input, input_encoding = read_n_lines(input_file, n)
 
             pattern = r'\d\d-\d\d\d\d'
-            result = re.match(pattern, filename)
+            result = re.match(pattern, input_file)
             order = result.group(0) if result else None
 
             tiraz, perso_mest, bad_data, trouble = consistency(input_file, input_encoding)
             if bad_data:
-                csv_input = trouble
+                preview_input = trouble
 
             session['order'] = order
-            session['filename'] = filename
+            session['input_file'] = input_file
             session['input_encoding'] = input_encoding
             session['output_encoding'] = ''
-            return render_template('index.html', csv_input=csv_input, perso_mest=perso_mest,
+            return render_template('index.html', preview_input=preview_input, perso_mest=perso_mest,
                                    status='done', tiraz=tiraz)
 
         elif "calculation" in request.form:
             form = request.form
             session['places'] = places = int(form['places'])
             session['pile'] = pile = int(form['pile'])
-            csv_input, _ = read_n_lines(input_file, n)
-
+            input_file = session['input_file']
             input_encoding = session['input_encoding']
 
+            output_file = os.path.splitext(input_file)[0]+'_'+str(places)+'x'+str(pile)+'.csv'
+            session['output_file'] = output_file
+            preview_input, _ = read_n_lines(input_file, n)
+
             tiraz, perso_mest, pile_size, izdeliy_v_privertke, full_pile_amount, hvost_izdeliy, \
-            hvost_listov, dummy = privertka(input_file, pile, places, input_encoding)
+            hvost_listov, dummy = privertka(input_file, output_file, pile, places, input_encoding)
 
-            csv_output, session['output_encoding'] = read_n_lines(converted_file, n)
+            preview_output, session['output_encoding'] = read_n_lines(output_file, n)
 
-            return render_template('index.html', csv_input=csv_input, csv_output=csv_output,
+            return render_template('index.html', preview_input=preview_input, preview_output=preview_output,
                                    places=places, pile_size=pile_size, tiraz=tiraz,
                                    perso_mest=perso_mest, izdeliy_v_privertke=izdeliy_v_privertke,
                                    full_pile_amount=full_pile_amount, hvost_izdeliy=hvost_izdeliy,
                                    hvost_listov=hvost_listov, dummy=dummy, status='')
 
         elif "download" in request.form:
-            download_file = "csvoutput.csv"
-            return send_file(download_file, as_attachment=True)
-
-        elif "perekladka" in request.form:
-            download_file = "perekladka.csv"
-            attachment_filename = download_file + "_" + str(session['places']) + "_" + str(session['pile'])+'.csv'
-            input_file = "csvinput.csv"
-            perekladka(input_file)
-            return send_file(download_file, as_attachment=True, attachment_filename=attachment_filename, mimetype='text/csv')
+            output_file = session['output_file']
+            return send_file(output_file, as_attachment=True)
 
         # elif "markirovka" in request.form:
         #     form = request.form
         #     pachka = int(form[''])
         #     _ = perekladka(input_file, pachka)
 
-        elif "test_fpdf" in request.form:
-            return ('Hello!!!')
     else:
+        session.pop('username', None)
+
+        session['state'] = 'init'
         return render_template('index.html')
+
+@app.route('/perekladka', methods=["GET", "POST"])
+def perekladka():
+    # elif "perekladka" in request.form:
+    input_file = session['input_file']
+    places = session['places']
+    pile = session['pile']
+    perekladka_filename = 'perekladka_'+os.path.splitext(input_file)[0] + '_' + str(places) + 'x' + str(pile) + '.csv'
+
+    do_perekladka(input_file, perekladka_filename)
+    return send_file(perekladka_filename, as_attachment=True, attachment_filename=perekladka_filename, mimetype='text/csv')
+
 
 
 @app.route('/markirovka', methods=["GET", "POST"])
@@ -98,11 +108,12 @@ def markirovka():
 
     pdf = FPDF('P', 'mm', [100, 60])
     if os.getenv("FLASK_ENV") == 'production':
-        pdf.add_font('DejaVuSans', '', '/app/static/DejaVuSans.ttf', uni=True)
+        font_path = '/app/static/DejaVuSans.ttf'
         encoding = 'utf-8'
     else:
-        pdf.add_font('DejaVuSans', '', 'C:\\Windows\\Fonts\\DejaVuSans.ttf', uni=True)
+        font_path = 'C:\\Windows\\Fonts\\DejaVuSans.ttf'
         encoding = 'windows-1251'
+    pdf.add_font('DejaVuSans', '', font_path, uni=True)
     pdf.set_font('DejaVuSans', '', 12)
     pdf.set_auto_page_break(False, 0)
 
@@ -119,7 +130,10 @@ def markirovka():
             # pdf.cell(0, 0, row['amount'], ln=2)
             # pdf.cell(0, 0, row['pers'], ln=2)
 
+            pdf.set_xy(20, 15)
             pdf.multi_cell(0, 5, txt, 0, 'L')
+            pdf.rect(0.1, 0.1, 99.8, 59.9)
+
 
     pdf.output(pdf_name, 'F')
 

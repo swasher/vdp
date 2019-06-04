@@ -17,7 +17,7 @@
 
    <div class="card">
       <div class="card-header">
-         Manage database
+         Manage database. State = <b>{{ session['state'] }}</b>
       </div>
 
       <div class="card-body p-1">
@@ -30,7 +30,7 @@
                            <input name="csvinput" type="file" class="custom-file-input" id="input-file" required
                                   {#onchange="UploadFile();"#}
                            >
-                           <label class="custom-file-label" for="input-file">{{ session['filename'] }}</label>
+                           <label class="custom-file-label" for="input-file">{{ session['input_file'] }}</label>
                         </div>
                      </div>
                      {#                        <button name="uploading" type="submit" class="btn btn-primary">Залить</button>#}
@@ -57,7 +57,6 @@
                      </div>
                      <button name="calculation" type="submit" class="btn btn-primary">Перестроить</button>
                      <button name="download" type="submit" class="btn btn-primary">Скачать</button>
-                     <button name="perekladka" type="submit" class="btn btn-primary">Перекладка</button>
 
                   {#<form action="perekladka" method="GET">
                      <button name="perekladka" type="submit" class="btn btn-primary">Перекладка</button>
@@ -70,14 +69,19 @@
             <div class="card m-1">
                <div class="card-body p-2">
 
-                  <div class="card ">
-                     <div class="card-body">
+                  <div class="row">
+                     <div class="col-4">
+                        <form action="perekladka" method="POST">
+                           <button name="perekladka" type="submit" class="btn btn-primary">Перекладка</button>
+                        </form>
+                     </div>
+                     <div class="col-4">
                         <form action="markirovka" method="POST">
-{#                           <div class="form-group">
+                           {#                   <div class="form-group">
                               <input class="form-control" type="text" name='privertka' placeholder="Кол-во изделий в упаковке" data-validation="number" >
                               <small class="form-text text-muted">Кол-во изделий в упаковке</small>
                            </div>#}
-                           <button action="markirovka"  name="markirovka" type="submit" class="btn btn-primary">test_Pypdf</button>
+                           <button name="markirovka" type="submit" class="btn btn-primary">Маркировка</button>
                         </form>
                      </div>
                   </div>
@@ -98,10 +102,10 @@
       <div class="card-body">
          <div class="row">
             <div class="col-sm-4">
-               <textarea id='input-area' rows="14" class="form-control" wrap="off" readonly>{{ csv_input }}</textarea>
+               <textarea id='input-area' rows="14" class="form-control" wrap="off" readonly>{{ preview_input }}</textarea>
             </div>
             <div class="col-sm-4">
-               <textarea rows="14" class="form-control" wrap="off" readonly>{{ csv_output }}</textarea>
+               <textarea rows="14" class="form-control" wrap="off" readonly>{{ preview_output }}</textarea>
             </div>
             <div class="col-sm-4">
                <table class="table table-sm table-condensed table-hover">

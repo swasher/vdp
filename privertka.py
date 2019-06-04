@@ -3,8 +3,6 @@
 import csv
 import pprint
 import math
-import chardet
-from io import StringIO
 
 pp = pprint.PrettyPrinter(indent=4)
 
@@ -27,9 +25,10 @@ pp = pprint.PrettyPrinter(indent=4)
 #         yield chunk
 
 
-def privertka(csv_file, pile_size, places, input_encoding):
+def privertka(csv_file, output_file, pile_size, places, input_encoding):
     """
     :param csv_file: входная база в формате csv, разделитель запятые
+    :param output_file: string, имя сконвертированного файла
     :param pile_size: размер привертки в листах
     :param places: кол-во изделий на листе
     :param input_encoding: string, кодировка входящего файла
@@ -152,7 +151,7 @@ def privertka(csv_file, pile_size, places, input_encoding):
 
     # Транспонирование. Объеденяем сначала все первые записи (в строку), получаем первый лист, и т.д.
     # Результат сразу пишем в файл
-    with open("csvoutput.csv", 'w', newline='\r\n') as f:
+    with open(output_file, 'w', newline='\r\n') as f:
         for i in range(len(items[0])):
             z = []
             for j in range(places):
