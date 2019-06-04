@@ -94,6 +94,7 @@ def perekladka():
     places = session['places']
     pile = session['pile']
     perekladka_filename = 'perekladka_'+os.path.splitext(input_file)[0] + '_' + str(places) + 'x' + str(pile) + '.csv'
+    session['perekladka_filename'] = perekladka_filename
 
     do_perekladka(input_file, perekladka_filename)
     return send_file(perekladka_filename, as_attachment=True, attachment_filename=perekladka_filename, mimetype='text/csv')
@@ -103,6 +104,8 @@ def perekladka():
 @app.route('/markirovka', methods=["GET", "POST"])
 def markirovka():
     pdf_name = 'mark.pdf'
+    perekladka_filename = session['perekladka_filename']
+
     # if pdf_name.ex
     # os.remove(pdf_name)
 
@@ -117,7 +120,7 @@ def markirovka():
     pdf.set_font('DejaVuSans', '', 12)
     pdf.set_auto_page_break(False, 0)
 
-    with open('perekladka.csv', 'r', encoding=encoding) as f:
+    with open(perekladka_filename, 'r', encoding=encoding) as f:
         reader = csv.DictReader(f)
         for row in reader:
             pdf.add_page()
