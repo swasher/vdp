@@ -103,8 +103,13 @@ def perekladka():
 
 @app.route('/markirovka', methods=["GET", "POST"])
 def markirovka():
+    input_file = session['input_file']
+    places = session['places']
+    pile = session['pile']
+    perekladka_filename = 'perekladka_' + os.path.splitext(input_file)[0] + '_' + str(places) + 'x' + str(pile) + '.csv'
+    do_perekladka(input_file, perekladka_filename)
+
     pdf_name = 'mark.pdf'
-    perekladka_filename = session['perekladka_filename']
 
     # if pdf_name.ex
     # os.remove(pdf_name)

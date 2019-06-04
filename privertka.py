@@ -151,13 +151,22 @@ def privertka(csv_file, output_file, pile_size, places, input_encoding):
 
     # Транспонирование. Объеденяем сначала все первые записи (в строку), получаем первый лист, и т.д.
     # Результат сразу пишем в файл
-    with open(output_file, 'w', newline='\r\n') as f:
+    with open(output_file, 'w', newline='\r\n', encoding='utf-8') as f:
+        """
+        items[0] - это как бы вертикальный первый столбец изделий. Его длина - это кол-во печ. листов.
+        """
         for i in range(len(items[0])):
             z = []
             for j in range(places):
                 z = z + items[j][i]
-            # print(type(z))
             s = ','.join(z)
+            if i == 0:
+                s += ',LIST'
+            else:
+                # вычисляем номер привертки от размера привертки и номера листа [https://repl.it/@swasher/privertka]
+                priv = (i - 1) // pile_size + 1
+                s += f',ЛИСТ {i} ПРИВЕРТКА {priv}'
+
             f.write(s+'\n')
 
     # возвращаем:

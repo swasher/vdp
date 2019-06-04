@@ -13,6 +13,7 @@ def grouper(n, iterable):
         yield chunk
 
 
+"""
 # DEPRECATED
 def markirovka1(csv_file, field, privertka):
 
@@ -37,8 +38,8 @@ def markirovka1(csv_file, field, privertka):
 
                 w.writerow([diapazon, pachka_size, pachka_number])
                 #print(s, end="\r") #печать в консоль в одну строку, типа прогресс
+"""
 
-# todo маркировка столбцов
 
 def do_perekladka(csv_file, out_file):
     """
@@ -123,15 +124,19 @@ def do_perekladka(csv_file, out_file):
         privertka += 1
         for i in range(places):
             chunk = ostatok[:hvost_listov]
+            ostatok = ostatok[hvost_listov:]
 
             pachka += 1
-            pers = ' - '.join([chunk[0][colon], chunk[-1][colon]])
-            ostatok = ostatok[hvost_listov:]
             amount = len(chunk)
 
-            # отнимаем из количества изделий в последней пачке кол-во пустышек
+            # если это последняя пачка, в которой могут быть пустышки,
+            # то отнимаем из количества изделий в последней пачке кол-во пустышек
+            # и последний номер ставим не пустышку, а реальное изделие
             if i == places-1:
                 amount -= dummy
+                pers = ' - '.join([chunk[0][colon], chunk[-1-dummy][colon]])
+            else:
+                pers = ' - '.join([chunk[0][colon], chunk[-1][colon]])
 
             writer.writerow({'order': f'№ Заказа: {order}',
                              'privertka': f'Привертка № {privertka}',
