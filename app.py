@@ -1,11 +1,15 @@
 import os
 import re
 import csv
+import logging
+import shutil
+
 from flask import Flask
 from flask import session
 from flask import send_file
 from flask import request
 from flask import render_template
+from flask import make_response
 from werkzeug.utils import secure_filename
 from fpdf import FPDF
 
@@ -16,14 +20,84 @@ from util import allowed_file
 
 app = Flask(__name__)
 app.config['N'] = int(os.getenv("N"))
+app.config['DATA_DIR'] = 'upload'
 app.secret_key = os.getenv("SECRET_KEY")
+
+
+logging.basicConfig(level=logging.INFO)
+log = logging.getLogger('vdp')
+
+
+@app.route('/dropzone', methods=['POST'])
+def dropzone():
+    # Route to deal with the uploaded chunks
+    # log.info(request.form)
+    # log.info(request.files)
+    n = app.config['N']
+    current_chunk = int(request.form['dzchunkindex'])
+
+
+    shutil.rmtree(app.config['DATA_DIR'], ignore_errors=True)
+    os.mkdir(app.config['DATA_DIR'])
+
+    file = request.files['file']
+    save_path = os.path.join(app.config['DATA_DIR'], file.filename)
+
+    input_file = save_path
+
+    try:
+        with open(save_path, 'ab') as f:
+            # Goto the offset, aka after the chunks we already wrote
+            f.seek(int(request.form['dzchunkbyteoffset']))
+            f.write(file.stream.read())
+    except OSError:
+        # log.exception will include the traceback so we can see what's wrong
+        log.exception('Could not write to file')
+        return make_response(("Couldn't write the file to disk", 500))
+
+    total_chunks = int(request.form['dztotalchunkcount'])
+
+    if current_chunk + 1 == total_chunks:
+        # This was the last chunk, the file should be complete and the size we expect
+        if os.path.getsize(save_path) != int(request.form['dztotalfilesize']):
+            log.error(f"File {file.filename} was completed, "
+                      f"but has a size mismatch."
+                      f"Was {os.path.getsize(save_path)} but we"
+                      f" expected {request.form['dztotalfilesize']} ")
+            return make_response(('Size mismatch', 500))
+        else:
+            log.info(f'File {file.filename} has been uploaded successfully')
+    else:
+        log.debug(f'Chunk {current_chunk + 1} of {total_chunks} '
+                  f'for file {file.filename} complete')
+
+    # session['input_file'] = file.filename
+    #
+    # # return make_response(('ok', 200))
+    #
+    # preview_input, input_encoding = read_n_lines(input_file, n)
+    #
+    # pattern = r'\d\d-\d\d\d\d'
+    # result = re.match(pattern, input_file)
+    # order = result.group(0) if result else None
+    #
+    # tiraz, perso_mest, bad_data, trouble = consistency(input_file, input_encoding)
+    # if bad_data:
+    #     preview_input = trouble
+    #
+    # session['order'] = order
+    # session['input_file'] = input_file
+    # session['input_encoding'] = input_encoding
+    # session['output_encoding'] = ''
+    # return render_template('index.html', preview_input=preview_input, perso_mest=perso_mest,
+    #                        status='done', tiraz=tiraz)
+    return make_response(("Chunk upload successful", 200))
+
 
 
 @app.route('/', methods=["GET", "POST"])
 def main():
     n = app.config['N']
-    # input_file = "csvinput.csv"
-    # converted_file = "csvoutput.csv"
     if request.method == "POST":
         if 'csvinput' in request.files:
             f = request.files['csvinput']
