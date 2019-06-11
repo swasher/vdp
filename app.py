@@ -118,6 +118,8 @@ def process_chunk():
 
 @app.route('/', methods=["GET", "POST"])
 def main():
+    if not os.path.exists('upload'):
+        os.mkdir('upload')
     n = app.config['N']
     if request.method == "POST":
         if 'csvinput' in request.files:
