@@ -3,6 +3,8 @@ import re
 import csv
 import logging
 import shutil
+from pathlib import Path
+from flask import jsonify
 
 from flask import Flask
 from flask import session
@@ -24,29 +26,68 @@ app.config['DATA_DIR'] = 'upload'
 app.secret_key = os.getenv("SECRET_KEY")
 
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.DEBUG)
 log = logging.getLogger('vdp')
 
 
-@app.route('/dropzone', methods=['POST'])
-def dropzone():
+@app.route('/clear_data_dir', methods=['POST'])
+def clear_data_dir():
+    try:
+        mypath = app.config['DATA_DIR']
+        # shutil.rmtree(mypath, ignore_errors=True)
+        # os.mkdir(app.config['DATA_DIR'])
+        for root, dirs, files in os.walk(mypath):
+            for file in files:
+                os.remove(os.path.join(root, file))
+        print('delete ok')
+        return jsonify(status=200)
+    except:
+        return jsonify(status=501)
+
+
+# DEPRECATED
+# @app.route('/create_empty', methods=['POST'])
+# def create_empty(name, size):
+#     path = os.path.join(app.config['DATA_DIR'], name)
+#     with open(path, "wb") as f:
+#         f.seek(int(size) - 1)
+#         f.write(b"\0")
+
+
+
+@app.route('/process_chunk', methods=['POST'])
+def process_chunk():
     # Route to deal with the uploaded chunks
     # log.info(request.form)
     # log.info(request.files)
     n = app.config['N']
     current_chunk = int(request.form['dzchunkindex'])
 
-
-    shutil.rmtree(app.config['DATA_DIR'], ignore_errors=True)
-    os.mkdir(app.config['DATA_DIR'])
-
     file = request.files['file']
     save_path = os.path.join(app.config['DATA_DIR'], file.filename)
+
+    # request data:
+    # dzuuid: 0e1bbd5b-260f-4d9b-a67f-534310f7df8a
+    # dzchunkindex: 35
+    # dztotalfilesize: 409
+    # dzchunksize: 10
+    # dztotalchunkcount: 41
+    # dzchunkbyteoffset: 350
+    # file: (binary)
+
+
+    # my_file = Path(save_path)
+    # if not my_file.is_file():
+    #     size = int(request.form['dztotalfilesize'])
+    #     with open(save_path, "wb") as f:
+    #         f.seek(size - 1)
+    #         f.write(b"\0")
+    #         f.seek(0)
 
     input_file = save_path
 
     try:
-        with open(save_path, 'ab') as f:
+        with open(save_path, 'ab+') as f:
             # Goto the offset, aka after the chunks we already wrote
             f.seek(int(request.form['dzchunkbyteoffset']))
             f.write(file.stream.read())
@@ -71,26 +112,6 @@ def dropzone():
         log.debug(f'Chunk {current_chunk + 1} of {total_chunks} '
                   f'for file {file.filename} complete')
 
-    # session['input_file'] = file.filename
-    #
-    # # return make_response(('ok', 200))
-    #
-    # preview_input, input_encoding = read_n_lines(input_file, n)
-    #
-    # pattern = r'\d\d-\d\d\d\d'
-    # result = re.match(pattern, input_file)
-    # order = result.group(0) if result else None
-    #
-    # tiraz, perso_mest, bad_data, trouble = consistency(input_file, input_encoding)
-    # if bad_data:
-    #     preview_input = trouble
-    #
-    # session['order'] = order
-    # session['input_file'] = input_file
-    # session['input_encoding'] = input_encoding
-    # session['output_encoding'] = ''
-    # return render_template('index.html', preview_input=preview_input, perso_mest=perso_mest,
-    #                        status='done', tiraz=tiraz)
     return make_response(("Chunk upload successful", 200))
 
 

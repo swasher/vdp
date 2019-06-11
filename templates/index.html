@@ -4,6 +4,8 @@
    <!-- Required meta tags -->
    <meta charset="utf-8">
    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+   <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+
 
    <!-- Bootstrap CSS -->
    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
@@ -45,26 +47,65 @@
                   </form>
 
 
-               <form method="POST" action='/dropzone' class="dropzone dz-clickable"
+               <form method="POST" action='/process_chunk' class="dropzone dz-clickable"
                      id="dropper" enctype="multipart/form-data">
                </form>
 
                <script type="application/javascript">
                    Dropzone.options.dropper = {
+                       {# https://gitlab.com/meno/dropzone/wikis/faq#chunked-uploads #}
                        paramName: 'file',
+                       acceptedFiles: '.csv',
                        chunking: true,
                        forceChunking: true,
-                       acceptedFiles: '.csv',
-                       parallelChunkUploads: True,
+                       chunkSize: 10, // bytes
+                       parallelChunkUploads: false,
                        maxFilesize: 1025, // megabytes
-                       chunkSize: 200000, // bytes
 
                        init: function() {
-                           this.on("success", function(file) {
-                               console.log('Success!!!!')
+
+                           this.on("drop", function () {
+                               console.log("Dragend, cleaning area");
+                               $('.dropzone')[0].dropzone.files.forEach(function(file) {
+                                   file.previewElement.remove();
+                               });
+
+                               $('.dropzone').removeClass('dz-started');
                            });
+
+
+                           this.on("success", function(file) {
+                               console.log('Success file upload: ' + file.name)
+                           });
+
                            this.on("addedfile", function(file) {
-                               console.log('ADDED!!!!')
+                               console.log('File dropped, perform destination folder cleaning...');
+                               var xhr = new XMLHttpRequest();
+                               xhr.open('POST', '/clear_data_dir');
+                               xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+                               xhr.onload = function() {
+                                   if (xhr.status === 200) {
+                                       console.log('clear folder ok: ' + xhr.responseText)
+                                   }
+                                   else if (xhr.status !== 200) {
+                                       console.log('FAILED CLEAN: ' + xhr.responseText)
+                                   }
+                               };
+                               xhr.send(encodeURI());
+
+                               var xhr = new XMLHttpRequest();
+                               xhr.open('POST', '/create_empty');
+                               xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+                               xhr.onload = function() {
+                                   if (xhr.status === 200) {
+                                       console.log('clear folder ok: ' + xhr.responseText)
+                                   }
+                                   else if (xhr.status !== 200) {
+                                       console.log('FAILED CLEAN: ' + xhr.responseText)
+                                   }
+                               };
+                               xhr.send(encodeURI());
+
                            });
                        }
                    };
