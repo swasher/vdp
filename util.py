@@ -1,12 +1,23 @@
 import os
 import chardet
+import sys
+from flask import current_app
 from chardet.universaldetector import UniversalDetector
 
 
 ALLOWED_EXTENSIONS = os.getenv("ALLOWED_EXTENSIONS")
 
 
-def read_n_lines(f, n):
+# DEPRECATED
+# @app.route('/create_empty', methods=['POST'])
+# def create_empty(name, size):
+#     path = os.path.join(app.config['DATA_DIR'], name)
+#     with open(path, "wb") as f:
+#         f.seek(int(size) - 1)
+#         f.write(b"\0")
+
+
+def read_n_lines(f, n, encoding):
     """
     :param f: имя файла
     :param n: кол-во строк
@@ -27,11 +38,14 @@ def read_n_lines(f, n):
         # detector.close()
         # encoding = detector.result['encoding']
 
-        k = datetime.now()
-        with open(f, 'rb') as csv_bytes:
-            rawdata = csv_bytes.read()
-            encoding = chardet.detect(rawdata[:n])['encoding']  # heavy operation if dont provide :n
-        print(datetime.now() - k)
+        # DEPRECATED; Now encoding is input parameter
+        # k = datetime.now()
+        # with open(f, 'rb') as csv_bytes:
+        #     rawdata = csv_bytes.read()
+        #     encoding = chardet.detect(rawdata)['encoding']  # heavy operation if dont provide :n
+        # print(datetime.now() - k)
+
+        # todo вынести определение кодировки из этой функции, это нужно делать только один раз
 
         # working code
         # with open(f, 'r', encoding=encoding) as csv_string:
@@ -47,7 +61,7 @@ def read_n_lines(f, n):
     except FileNotFoundError:
         txt = 'FileNotFoundError'
         encoding = 'FileNotFoundError'
-    return txt, encoding
+    return txt
 
 
 def allowed_file(filename):
@@ -67,3 +81,21 @@ def line_end_convert(file_path):
 
     with open(file_path, 'wb') as open_file:
         open_file.write(content)
+
+
+
+def try_utf8(file_name):
+    """
+    Возвращает строку. Если файл в кодировке utf-8, возвращает 'utf-8', иначе деволтное значение.
+    :param file_name:
+    :return: string
+    """
+
+    with open(file_name, 'rb') as f:
+        data = f.read()
+
+    try:
+        data.decode('utf-8')
+        return 'utf-8'
+    except UnicodeDecodeError:
+        return current_app.config['NON_UTF_INPUT_ENC']

@@ -113,38 +113,42 @@ def do_perekladka(csv_file, out_file):
 
         # а теперь хвост (хвост, это когда изделий уже не хватает на целую привертку)
         hvost_izdeliy = len(ostatok)
-        hvost_listov = math.ceil(hvost_izdeliy / places)
-        dummy = places * hvost_listov - hvost_izdeliy
+        if hvost_izdeliy:
+            hvost_listov = math.ceil(hvost_izdeliy / places)
+            dummy = places * hvost_listov - hvost_izdeliy
 
-        # добавляем к остатку
-        empty = ['-' for i in range(len(header))]
-        for i in range(dummy):
-            ostatok.append(empty)
+            # добавляем к остатку пустышки ('-'), чтобы получить полную последнюю пачку
+            empty = ['-' for i in range(len(header))]
+            for i in range(dummy):
+                ostatok.append(empty)
 
-        privertka += 1
-        for i in range(places):
-            chunk = ostatok[:hvost_listov]
-            ostatok = ostatok[hvost_listov:]
+            # увеличиваем значение privertka на 1 - это последняя привертка с меньшим кол-вом листов
+            privertka += 1
 
-            pachka += 1
-            amount = len(chunk)
+            # далее все как и для полных приверток
+            for i in range(places):
+                chunk = ostatok[:hvost_listov]
+                ostatok = ostatok[hvost_listov:]
 
-            # если это последняя пачка, в которой могут быть пустышки,
-            # то отнимаем из количества изделий в последней пачке кол-во пустышек
-            # и последний номер ставим не пустышку, а реальное изделие
-            if i == places-1:
-                amount -= dummy
-                pers = ' - '.join([chunk[0][colon], chunk[-1-dummy][colon]])
-            else:
-                pers = ' - '.join([chunk[0][colon], chunk[-1][colon]])
+                pachka += 1
+                amount = len(chunk)
 
-            writer.writerow({'order': f'№ Заказа: {order}',
-                             'privertka': f'Привертка № {privertka}',
-                             'pachka': f'Пачка №{pachka} (из {total_pachki})',
-                             'amount': f'Кол-во в пачке: {amount}',
-                             'pers': f'Номера с/по: {pers}'})
-            # str = f'Заказ: {order}\nПривертка {privertka}\nПачка: {pachka}\nВ пачке: {amount}\nНомера {pers}'
-            # csvfile.write(str)
+                # если это последняя пачка, в которой могут быть пустышки,
+                # то отнимаем из количества изделий в последней пачке кол-во пустышек
+                # и последний номер ставим не пустышку, а реальное изделие
+                if i == places-1:
+                    amount -= dummy
+                    pers = ' - '.join([chunk[0][colon], chunk[-1-dummy][colon]])
+                else:
+                    pers = ' - '.join([chunk[0][colon], chunk[-1][colon]])
+
+                writer.writerow({'order': f'№ Заказа: {order}',
+                                 'privertka': f'Привертка № {privertka}',
+                                 'pachka': f'Пачка №{pachka} (из {total_pachki})',
+                                 'amount': f'Кол-во в пачке: {amount}',
+                                 'pers': f'Номера с/по: {pers}'})
+                # str = f'Заказ: {order}\nПривертка {privertka}\nПачка: {pachka}\nВ пачке: {amount}\nНомера {pers}'
+                # csvfile.write(str)
 
 
 def main():

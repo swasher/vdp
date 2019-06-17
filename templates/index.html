@@ -47,7 +47,7 @@
                   </form>
 
 
-               <form method="POST" action='/process_chunk' class="dropzone dz-clickable"
+               <form method="POST" action='/process_chunk2' class="dropzone dz-clickable"
                      id="dropper" enctype="multipart/form-data">
                </form>
 
@@ -58,14 +58,14 @@
                        acceptedFiles: '.csv',
                        chunking: true,
                        forceChunking: true,
-                       chunkSize: 100000, // bytes
-                       parallelChunkUploads: false,
+                       chunkSize: 50, // bytes
+                       parallelChunkUploads: true,
                        maxFilesize: 1025, // megabytes
 
                        init: function() {
 
                            this.on("drop", function () {
-                               console.log("Dragend, cleaning area");
+                               console.log("'drop' event, cleaning area");
                                $('.dropzone')[0].dropzone.files.forEach(function(file) {
                                    file.previewElement.remove();
                                });
@@ -93,6 +93,22 @@
                                };
                                xhr.send(encodeURI());
                            });
+
+                           this.on('complete', function () {
+                               console.log("'complete' event, perform chunks combine...");
+                               var xhr = new XMLHttpRequest();
+                               xhr.open('POST', '/chunks_combine');
+                               xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+                               xhr.onload = function() {
+                                   if (xhr.status === 200) {
+                                       console.log('combine response: ' + xhr.responseText)
+                                   }
+                                   else if (xhr.status !== 200) {
+                                       console.log('combine FAILED : ' + xhr.responseText)
+                                   }
+                               };
+                               xhr.send(encodeURI());
+                           })
                        }
                    };
                </script>
@@ -183,7 +199,7 @@
                    <tr><th scope="row">Хвост, листов</th><td>{{ hvost_listov }}</td></tr>
                    <tr><th scope="row">Пустышек</th><td>{{ dummy }}</td></tr>
                    <tr><th scope="row">Input Encoding</th><td>{{ session['input_encoding'] }}</td></tr>
-                   <tr><th scope="row">Output Encoding</th><td>{{ session['output_encoding'] }}</td></tr>
+                   <tr><th scope="row">Output Encoding</th><td>{{ config['OUTPUT_ENCODING'] }}</td></tr>
                  </tbody>
                </table>
             </div>

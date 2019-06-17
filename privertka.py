@@ -3,7 +3,7 @@
 import csv
 import pprint
 import math
-
+from flask import current_app
 pp = pprint.PrettyPrinter(indent=4)
 
 """
@@ -151,7 +151,7 @@ def privertka(csv_file, output_file, pile_size, places, input_encoding):
 
     # Транспонирование. Объеденяем сначала все первые записи (в строку), получаем первый лист, и т.д.
     # Результат сразу пишем в файл
-    with open(output_file, 'w', newline='\r\n', encoding='utf-8') as f:
+    with open(output_file, 'w', newline='\r\n', encoding=current_app.config['OUTPUT_ENCODING']) as f:
         """
         items[0] - это как бы вертикальный первый столбец изделий. Его длина - это кол-во печ. листов.
         """

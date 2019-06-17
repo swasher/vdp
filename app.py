@@ -2,8 +2,7 @@ import os
 import re
 import csv
 import logging
-import shutil
-from pathlib import Path
+import tempfile
 from flask import jsonify
 
 from flask import Flask
@@ -19,19 +18,35 @@ from privertka import privertka
 from markirovka import do_perekladka
 from util import read_n_lines
 from util import allowed_file
+from util import try_utf8
+
 
 app = Flask(__name__)
 app.config['N'] = int(os.getenv("N"))
 app.config['DATA_DIR'] = 'upload'
+app.config['NON_UTF_INPUT_ENC'] = 'windows-1251'
+app.config['OUTPUT_ENCODING'] = 'windows-1251'
 app.secret_key = os.getenv("SECRET_KEY")
 
 
-logging.basicConfig(level=logging.DEBUG)
-log = logging.getLogger('vdp')
+# logging.basicConfig(level=logging.DEBUG)
+# log = logging.getLogger('vdp')
+log = logging.getLogger('werkzeug')
+log.setLevel(logging.ERROR)
+
 
 
 @app.route('/clear_data_dir', methods=['POST'])
 def clear_data_dir():
+
+    # это обработчик события dropzone `addedfile`,
+    # которое возникает, когда пользователь кидает файл в зону дропа
+
+    # мы создаем новый массив для хранения имен файлов загруженных чанков
+    session['chunks_files'] = []
+    session['chunks_files'].clear()
+    print('Chunks info destroed.')
+
     try:
         mypath = app.config['DATA_DIR']
         # shutil.rmtree(mypath, ignore_errors=True)
@@ -39,20 +54,59 @@ def clear_data_dir():
         for root, dirs, files in os.walk(mypath):
             for file in files:
                 os.remove(os.path.join(root, file))
-        print('delete ok')
+        print('delete old files: ok')
         return jsonify(status=200)
     except:
         return jsonify(status=501)
 
 
 # DEPRECATED
-# @app.route('/create_empty', methods=['POST'])
-# def create_empty(name, size):
-#     path = os.path.join(app.config['DATA_DIR'], name)
-#     with open(path, "wb") as f:
-#         f.seek(int(size) - 1)
-#         f.write(b"\0")
+# @app.route('/upload', methods=['POST'])
+# def upload():
+#     if request.method == 'POST':
+#         f = request.files.get('file')
+#         f.save(os.path.join('upload', f.filename))
+#
+#     return 'upload template'
 
+
+@app.route('/process_chunk2', methods=['POST'])
+def process_chunk2():
+    file = request.files['file']
+
+    with tempfile.NamedTemporaryFile(delete=False) as fp:
+        temp_name = fp.name
+        fp.write(file.stream.read())
+
+    chunk = {
+        "chunk_id":  int(request.form['dzchunkindex']),
+        "chunk_file": temp_name,
+    }
+
+    session['chunks_files'].append(chunk)
+    session['chunks_totalsize'] = request.form['dztotalfilesize']
+    session['chunks_totalchunkcount'] = request.form['dztotalchunkcount']
+
+    print(f'uploaded chunk {chunk["chunk_id"]}')
+    print(f"---- len {len(session['chunks_files'])}")
+    print(f"---- cont {session['chunks_files']}")
+
+    return make_response(("Chunk upload successful", 200))
+
+
+@app.route('/chunks_combine', methods=['POST'])
+def chunks_combine():
+    print(session['chunks_files'])
+
+    d = session['chunks_files']
+
+    sorted_d = sorted(d, key=lambda x: x['chunk_id'])
+    # equivalent version
+    # sorted_d = sorted(d.items(), key=lambda (k,v): v)
+    print(sorted_d)
+    print(f"Must be {session['chunks_totalchunkcount']} but we have {len(d)}")
+
+    return make_response(("Chunk combine successful", 200))
 
 
 @app.route('/process_chunk', methods=['POST'])
@@ -130,19 +184,21 @@ def main():
             else:
                 raise Exception('Not valid filename!')
 
-            preview_input, input_encoding = read_n_lines(input_file, n)
+            session['input_encoding'] = try_utf8(input_file)
+
+            preview_input = read_n_lines(input_file, n, session['input_encoding'])
 
             pattern = r'\d\d-\d\d\d\d'
             result = re.match(pattern, input_file)
             order = result.group(0) if result else None
 
-            tiraz, perso_mest, bad_data, trouble = consistency(input_file, input_encoding)
+            tiraz, perso_mest, bad_data, trouble = consistency(input_file, session['input_encoding'])
             if bad_data:
                 preview_input = trouble
 
             session['order'] = order
             session['input_file'] = input_file
-            session['input_encoding'] = input_encoding
+
             session['output_encoding'] = ''
             return render_template('index.html', preview_input=preview_input, perso_mest=perso_mest,
                                    status='done', tiraz=tiraz)
@@ -156,12 +212,12 @@ def main():
 
             output_file = os.path.splitext(input_file)[0]+'_'+str(places)+'x'+str(pile)+'.csv'
             session['output_file'] = output_file
-            preview_input, _ = read_n_lines(input_file, n)
+            preview_input = read_n_lines(input_file, n, session['input_encoding'])
 
             tiraz, perso_mest, pile_size, izdeliy_v_privertke, full_pile_amount, hvost_izdeliy, \
             hvost_listov, dummy = privertka(input_file, output_file, pile, places, input_encoding)
 
-            preview_output, session['output_encoding'] = read_n_lines(output_file, n)
+            preview_output = read_n_lines(output_file, n, app.config['OUTPUT_ENCODING'])
 
             return render_template('index.html', preview_input=preview_input, preview_output=preview_output,
                                    places=places, pile_size=pile_size, tiraz=tiraz,
@@ -272,6 +328,8 @@ def consistency(f, encoding):
                 bad_data = True
         tiraz += 1
         return tiraz, columns, bad_data, text
+
+
 
 
 if __name__ == '__main__':
